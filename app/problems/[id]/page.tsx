@@ -41,7 +41,7 @@ export default async function ProblemPage({
     <div className="animate-fade-in">
       <div className="mb-6 flex items-center gap-2 text-xs text-mist-dim">
         <Link href="/" className="transition-colors hover:text-mist">
-          Problems
+          문제
         </Link>
         <span>/</span>
         <span className="font-mono text-mist-soft">
@@ -68,7 +68,7 @@ export default async function ProblemPage({
           <div className="panel space-y-8 p-7">
             <div>
               <h2 className="mb-3 text-xs font-medium uppercase tracking-[0.2em] text-aurora-glow">
-                Description
+                설명
               </h2>
               <p className="whitespace-pre-wrap text-sm leading-relaxed text-mist-soft">
                 {problem.description}
@@ -79,7 +79,7 @@ export default async function ProblemPage({
 
             <div>
               <h2 className="mb-3 text-xs font-medium uppercase tracking-[0.2em] text-aurora-glow">
-                Input
+                입력
               </h2>
               <p className="whitespace-pre-wrap text-sm leading-relaxed text-mist-soft">
                 {problem.input_desc || "—"}
@@ -90,7 +90,7 @@ export default async function ProblemPage({
 
             <div>
               <h2 className="mb-3 text-xs font-medium uppercase tracking-[0.2em] text-aurora-glow">
-                Output
+                출력
               </h2>
               <p className="whitespace-pre-wrap text-sm leading-relaxed text-mist-soft">
                 {problem.output_desc || "—"}
@@ -100,17 +100,16 @@ export default async function ProblemPage({
 
           <div className="rounded-xl border border-white/[0.06] bg-abyss-800/40 p-5">
             <p className="text-xs leading-relaxed text-mist-dim">
-              Submissions run on the public Piston GolfScript runtime. Your
-              program reads from{" "}
+              제출한 코드는 내장 GolfScript 인터프리터에서 실행됩니다. 프로그램은{" "}
               <code className="rounded bg-abyss-700 px-1 py-0.5 font-mono text-aurora-glow">
-                stdin
-              </code>{" "}
-              and writes to{" "}
-              <code className="rounded bg-abyss-700 px-1 py-0.5 font-mono text-aurora-glow">
-                stdout
+                표준 입력
               </code>
-              . Output is compared after trimming surrounding whitespace.
-              Ranking is by exact UTF-8 byte size.
+              에서 읽고{" "}
+              <code className="rounded bg-abyss-700 px-1 py-0.5 font-mono text-aurora-glow">
+                표준 출력
+              </code>
+              으로 씁니다. 출력은 양 끝 공백을 제거한 뒤 비교하며, 순위는 정확한
+              UTF-8 바이트 크기로 매겨집니다.
             </p>
           </div>
         </section>

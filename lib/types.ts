@@ -51,7 +51,6 @@ export interface CaseResult {
 
 export interface SubmitRequestBody {
   problemId: number;
-  username: string;
   code: string;
 }
 

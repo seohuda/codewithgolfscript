@@ -29,38 +29,33 @@ export default async function HomePage() {
         <div className="pointer-events-none absolute -bottom-24 left-1/3 h-72 w-72 rounded-full bg-aurora-cyan/10 blur-3xl" />
         <div className="relative max-w-2xl">
           <p className="mb-3 text-xs font-medium uppercase tracking-[0.3em] text-aurora-glow">
-            GolfScript Only
+            GolfScript 전용
           </p>
           <h1 className="text-4xl font-semibold leading-tight tracking-tight text-mist md:text-5xl">
-            Win with the{" "}
-            <span className="aurora-text">fewest bytes</span>.
+            가장 적은 <span className="aurora-text">바이트</span>로 승리하세요.
           </h1>
           <p className="mt-5 max-w-xl text-base leading-relaxed text-mist-soft">
-            A short-coding judge built for the maniacs. Every solution is
-            measured by its exact UTF-8 byte size. Solve the problem, then
-            shrink it until nothing remains but signal.
+            매니아를 위한 숏코딩 채점소입니다. 모든 풀이는 정확한 UTF-8 바이트
+            크기로 측정됩니다. 문제를 풀고, 신호만 남을 때까지 코드를 줄여
+            보세요.
           </p>
         </div>
       </section>
 
       <section>
         <div className="mb-6 flex items-end justify-between">
-          <h2 className="text-lg font-medium tracking-wide text-mist">
-            Problems
-          </h2>
-          <span className="text-xs text-mist-dim">
-            {problems.length} available
-          </span>
+          <h2 className="text-lg font-medium tracking-wide text-mist">문제</h2>
+          <span className="text-xs text-mist-dim">{problems.length}개</span>
         </div>
 
         {problems.length === 0 ? (
           <div className="panel px-6 py-12 text-center">
             <p className="text-sm text-mist-soft">
-              No problems found. Configure Supabase and run{" "}
+              문제를 찾을 수 없습니다. Supabase를 설정하고{" "}
               <code className="rounded bg-abyss-700 px-1.5 py-0.5 font-mono text-xs text-aurora-glow">
                 sql/schema.sql
               </code>{" "}
-              to seed the database.
+              을 실행해 데이터를 추가하세요.
             </p>
           </div>
         ) : (
@@ -76,7 +71,7 @@ export default async function HomePage() {
                       #{String(p.id).padStart(3, "0")}
                     </span>
                     <span className="text-[10px] uppercase tracking-widest text-aurora-glow opacity-0 transition-opacity group-hover:opacity-100">
-                      Solve &rarr;
+                      풀기 &rarr;
                     </span>
                   </div>
                   <h3 className="text-base font-medium text-mist transition-colors group-hover:text-white">

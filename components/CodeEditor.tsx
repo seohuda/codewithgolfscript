@@ -1,7 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { SubmitResponse, Verdict } from "@/lib/types";
+import { useAuth } from "./AuthProvider";
 
 interface CodeEditorProps {
   problemId: number;
@@ -21,40 +23,40 @@ const VERDICT_META: Record<
   { label: string; className: string; ring: string }
 > = {
   AC: {
-    label: "Accepted",
+    label: "정답",
     className: "text-aurora-cyan",
     ring: "ring-aurora-cyan/40",
   },
   WA: {
-    label: "Wrong Answer",
+    label: "오답",
     className: "text-rose-400",
     ring: "ring-rose-400/40",
   },
   TLE: {
-    label: "Time Limit Exceeded",
+    label: "시간 초과",
     className: "text-amber-400",
     ring: "ring-amber-400/40",
   },
   RE: {
-    label: "Runtime Error",
+    label: "런타임 에러",
     className: "text-orange-400",
     ring: "ring-orange-400/40",
   },
   CE: {
-    label: "Compile Error",
+    label: "컴파일 에러",
     className: "text-orange-400",
     ring: "ring-orange-400/40",
   },
   PENDING: {
-    label: "Pending",
+    label: "대기 중",
     className: "text-mist-soft",
     ring: "ring-white/10",
   },
 };
 
 export default function CodeEditor({ problemId, onAccepted }: CodeEditorProps) {
+  const { user, loading } = useAuth();
   const [code, setCode] = useState<string>("");
-  const [username, setUsername] = useState<string>("");
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [result, setResult] = useState<SubmitResponse | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -66,13 +68,12 @@ export default function CodeEditor({ problemId, onAccepted }: CodeEditorProps) {
     setErrorMsg(null);
     setResult(null);
 
-    const trimmedUser = username.trim();
-    if (!trimmedUser) {
-      setErrorMsg("Enter a username before submitting.");
+    if (!user) {
+      setErrorMsg("제출하려면 로그인이 필요합니다.");
       return;
     }
     if (!code) {
-      setErrorMsg("Write some GolfScript before submitting.");
+      setErrorMsg("GolfScript 코드를 입력해 주세요.");
       return;
     }
 
@@ -81,7 +82,7 @@ export default function CodeEditor({ problemId, onAccepted }: CodeEditorProps) {
       const res = await fetch("/api/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ problemId, username: trimmedUser, code }),
+        body: JSON.stringify({ problemId, code }),
       });
 
       const data = (await res.json()) as SubmitResponse;
@@ -95,7 +96,7 @@ export default function CodeEditor({ problemId, onAccepted }: CodeEditorProps) {
       }
     } catch (e) {
       setErrorMsg(
-        e instanceof Error ? e.message : "Submission failed. Please retry.",
+        e instanceof Error ? e.message : "제출에 실패했습니다. 다시 시도해 주세요.",
       );
     } finally {
       setSubmitting(false);
@@ -126,23 +127,25 @@ export default function CodeEditor({ problemId, onAccepted }: CodeEditorProps) {
 
   return (
     <div className="flex h-full flex-col gap-4">
-      {/* Username row */}
-      <div className="flex items-center gap-3">
-        <label
-          htmlFor="username"
-          className="text-xs uppercase tracking-[0.2em] text-mist-dim"
-        >
-          Handle
-        </label>
-        <input
-          id="username"
-          type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          placeholder="your_handle"
-          maxLength={64}
-          className="flex-1 rounded-lg border border-white/[0.08] bg-abyss-900/60 px-3 py-2 font-mono text-sm text-mist outline-none transition-colors placeholder:text-mist-dim/60 focus:border-aurora-indigo/50 focus:ring-1 focus:ring-aurora-indigo/30"
-        />
+      {/* Login status row */}
+      <div className="flex items-center justify-between rounded-lg border border-white/[0.06] bg-abyss-900/40 px-4 py-2.5">
+        <span className="text-xs uppercase tracking-[0.2em] text-mist-dim">
+          제출자
+        </span>
+        {loading ? (
+          <span className="h-4 w-20 animate-pulse rounded bg-white/[0.06]" />
+        ) : user ? (
+          <span className="font-mono text-sm">
+            <span className="aurora-text font-medium">{user.username}</span>
+          </span>
+        ) : (
+          <span className="text-sm text-mist-soft">
+            <Link href="/login" className="aurora-text font-medium hover:underline">
+              로그인
+            </Link>{" "}
+            후 제출할 수 있습니다
+          </span>
+        )}
       </div>
 
       {/* Editor */}
@@ -169,18 +172,18 @@ export default function CodeEditor({ problemId, onAccepted }: CodeEditorProps) {
           autoComplete="off"
           autoCorrect="off"
           autoCapitalize="off"
-          placeholder={`# Write your GolfScript here\n~`}
+          placeholder={`# 여기에 GolfScript 코드를 입력하세요\n~`}
           className="golf-editor h-[360px] w-full resize-none bg-transparent px-5 py-4 text-sm text-mist outline-none"
         />
 
         {/* Byte counter — glows softly in neon. */}
         <div className="flex items-center justify-between border-t border-white/[0.06] bg-abyss-900/40 px-5 py-3">
           <span className="font-mono text-[11px] text-mist-dim">
-            {chars} chars
+            {chars}자
           </span>
           <span className="relative flex items-center gap-2">
             <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-mist-dim">
-              size
+              크기
             </span>
             <span className="relative inline-flex items-center">
               <span className="absolute inset-0 -z-10 animate-aurora-pulse rounded-md bg-aurora-gradient opacity-30 blur-md" />
@@ -188,7 +191,7 @@ export default function CodeEditor({ problemId, onAccepted }: CodeEditorProps) {
                 {bytes}
               </span>
               <span className="ml-1 font-mono text-xs text-aurora-glow">
-                bytes
+                바이트
               </span>
             </span>
           </span>
@@ -200,11 +203,11 @@ export default function CodeEditor({ problemId, onAccepted }: CodeEditorProps) {
         <button
           type="button"
           onClick={handleSubmit}
-          disabled={submitting}
+          disabled={submitting || loading || !user}
           className="group relative inline-flex items-center gap-2 overflow-hidden rounded-lg border border-aurora-indigo/40 bg-abyss-800 px-5 py-2.5 text-sm font-medium text-mist transition-all hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
         >
           <span className="absolute inset-0 -z-10 bg-aurora-gradient opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-disabled:opacity-0" />
-          {submitting ? "Judging…" : "Submit"}
+          {submitting ? "채점 중…" : !user ? "로그인 필요" : "제출"}
           <span className="font-mono text-[10px] text-mist-dim transition-colors group-hover:text-white/80">
             {"\u2318\u23ce"}
           </span>
@@ -234,13 +237,13 @@ export default function CodeEditor({ problemId, onAccepted }: CodeEditorProps) {
             <div className="flex items-center gap-4 text-xs text-mist-dim">
               <span>
                 <span className="text-mist">{result.passed}</span>/
-                {result.total} cases
+                {result.total} 케이스
               </span>
               <span>
                 <span className="aurora-text font-mono font-semibold">
                   {result.bytes}
                 </span>{" "}
-                bytes
+                바이트
               </span>
             </div>
           </div>
@@ -253,7 +256,7 @@ export default function CodeEditor({ problemId, onAccepted }: CodeEditorProps) {
                 return (
                   <div
                     key={c.index}
-                    title={`${c.hidden ? "Hidden case" : "Sample case"} #${
+                    title={`${c.hidden ? "히든" : "공개"} 케이스 #${
                       c.index + 1
                     }: ${meta.label}`}
                     className={`flex items-center gap-1.5 rounded-md border border-white/[0.06] bg-abyss-900/60 px-2.5 py-1.5 font-mono text-[11px] ${meta.className}`}

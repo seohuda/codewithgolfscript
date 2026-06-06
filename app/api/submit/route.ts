@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
 import { runGolfScriptCase } from "@/lib/piston";
 import { byteLength } from "@/lib/bytes";
+import { verifySessionToken, SESSION_COOKIE } from "@/lib/auth";
 import {
   CaseResult,
   SubmitRequestBody,
@@ -49,6 +50,23 @@ function badRequest(message: string): NextResponse<SubmitResponse> {
 }
 
 export async function POST(req: NextRequest) {
+  // --- Require a logged-in session ------------------------------------
+  const session = verifySessionToken(req.cookies.get(SESSION_COOKIE)?.value);
+  if (!session) {
+    return NextResponse.json<SubmitResponse>(
+      {
+        submissionId: null,
+        verdict: "RE",
+        bytes: 0,
+        passed: 0,
+        total: 0,
+        results: [],
+        message: "로그인이 필요합니다.",
+      },
+      { status: 401 },
+    );
+  }
+
   let body: SubmitRequestBody;
   try {
     body = (await req.json()) as SubmitRequestBody;
@@ -57,23 +75,16 @@ export async function POST(req: NextRequest) {
   }
 
   const problemId = Number(body?.problemId);
-  const username = (body?.username ?? "").trim();
   const code = typeof body?.code === "string" ? body.code : "";
 
   if (!Number.isFinite(problemId) || problemId <= 0) {
     return badRequest("A valid problemId is required.");
   }
-  if (!username) {
-    return badRequest("A username is required.");
-  }
-  if (username.length > 64) {
-    return badRequest("Username must be 64 characters or fewer.");
-  }
   if (!code) {
-    return badRequest("Submitted code cannot be empty.");
+    return badRequest("제출할 코드를 입력해 주세요.");
   }
   if (code.length > 100000) {
-    return badRequest("Submitted code is too large.");
+    return badRequest("코드가 너무 깁니다.");
   }
 
   // Exact UTF-8 byte size — this is the ranking metric.
@@ -81,56 +92,8 @@ export async function POST(req: NextRequest) {
 
   const admin = getSupabaseAdminClient();
 
-  // --- Resolve / create the user --------------------------------------
-  let userId: string;
-  {
-    const { data: existing, error: selErr } = await admin
-      .from("users")
-      .select("id")
-      .eq("username", username)
-      .maybeSingle();
-
-    if (selErr) {
-      return NextResponse.json<SubmitResponse>(
-        {
-          submissionId: null,
-          verdict: "RE",
-          bytes,
-          passed: 0,
-          total: 0,
-          results: [],
-          message: `Database error (user lookup): ${selErr.message}`,
-        },
-        { status: 500 },
-      );
-    }
-
-    if (existing?.id) {
-      userId = existing.id as string;
-    } else {
-      const { data: created, error: insErr } = await admin
-        .from("users")
-        .insert({ username })
-        .select("id")
-        .single();
-
-      if (insErr || !created) {
-        return NextResponse.json<SubmitResponse>(
-          {
-            submissionId: null,
-            verdict: "RE",
-            bytes,
-            passed: 0,
-            total: 0,
-            results: [],
-            message: `Database error (user create): ${insErr?.message ?? "unknown"}`,
-          },
-          { status: 500 },
-        );
-      }
-      userId = created.id as string;
-    }
-  }
+  // --- User comes from the verified session ---------------------------
+  const userId: string = session.userId;
 
   // --- Verify the problem exists --------------------------------------
   {

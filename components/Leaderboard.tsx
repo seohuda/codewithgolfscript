@@ -17,7 +17,7 @@ function formatBytes(bytes: number): string {
 function formatTime(iso: string): string {
   try {
     const d = new Date(iso);
-    return d.toLocaleString(undefined, {
+    return d.toLocaleString("ko-KR", {
       year: "numeric",
       month: "short",
       day: "2-digit",
@@ -88,26 +88,27 @@ export default function Leaderboard({
     <div className="panel overflow-hidden">
       <div className="flex items-center justify-between border-b border-white/[0.06] px-5 py-4">
         <h3 className="text-sm font-medium tracking-wide text-mist">
-          Leaderboard
+          리더보드
         </h3>
         <span className="text-[10px] uppercase tracking-[0.2em] text-mist-dim">
-          Bytes &uarr; · Time &uarr;
+          바이트 &uarr; · 시간 &uarr;
         </span>
       </div>
 
       {loading ? (
         <div className="px-5 py-10 text-center text-sm text-mist-dim">
-          Loading rankings&hellip;
+          순위를 불러오는 중&hellip;
         </div>
       ) : error ? (
         <div className="px-5 py-10 text-center text-sm text-mist-soft">
-          Unable to load leaderboard.
+          리더보드를 불러오지 못했습니다.
           <span className="mt-1 block text-xs text-mist-dim">{error}</span>
         </div>
       ) : rows.length === 0 ? (
         <div className="px-5 py-10 text-center text-sm text-mist-dim">
-          No accepted solutions yet. Be the first to land an{" "}
-          <span className="font-mono text-aurora-cyan">AC</span>.
+          아직 정답이 없습니다. 첫{" "}
+          <span className="font-mono text-aurora-cyan">AC</span>의 주인공이
+          되어 보세요.
         </div>
       ) : (
         <div className="overflow-x-auto">
@@ -118,13 +119,13 @@ export default function Leaderboard({
                   #
                 </th>
                 <th className="border-b border-white/[0.06] px-5 py-3 font-medium">
-                  User
+                  유저
                 </th>
                 <th className="border-b border-white/[0.06] px-5 py-3 text-right font-medium">
-                  Bytes
+                  바이트
                 </th>
                 <th className="border-b border-white/[0.06] px-5 py-3 text-right font-medium">
-                  Submitted
+                  제출 시각
                 </th>
               </tr>
             </thead>
