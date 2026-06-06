@@ -12,6 +12,10 @@ export interface Problem {
   description: string;
   input_desc: string;
   output_desc: string;
+  tier?: number;
+  source?: string;
+  sample_input?: string;
+  sample_output?: string;
   created_at: string;
 }
 

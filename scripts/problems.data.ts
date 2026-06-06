@@ -19,9 +19,12 @@ export interface SeedCase {
 export interface SeedProblem {
   title: string;
   tier: number;
+  source?: string;
   description: string;
   inputDesc: string;
   outputDesc: string;
+  sampleInput?: string;
+  sampleOutput?: string;
   solution: string;
   cases: SeedCase[];
 }
@@ -1421,6 +1424,312 @@ const P: SeedProblem[] = [
       { stdin: "1 5", stdout: "120" },
       { stdin: "3 4", stdout: "12" },
       { stdin: "2 5", stdout: "120", hidden: true },
+    ],
+  },
+
+  // ---- 외부 유래 문제 (출처 명시, GolfScript 풀이 가능) -------------
+  {
+    title: "Hello, World!",
+    tier: 2,
+    source: "고전 프로그래밍 입문 예제 (K&R)",
+    description:
+      "입력과 무관하게 항상 정확히 `Hello, World!` 를 출력합니다.",
+    inputDesc: "입력은 주어지지만 사용하지 않습니다.",
+    outputDesc: "문자열 `Hello, World!`.",
+    solution: ';"Hello, World!"',
+    cases: [
+      { stdin: "", stdout: "Hello, World!" },
+      { stdin: "anything", stdout: "Hello, World!" },
+      { stdin: "123", stdout: "Hello, World!", hidden: true },
+    ],
+  },
+  {
+    title: "3 또는 5의 배수 합",
+    tier: 10,
+    source: "Project Euler #1 (Multiples of 3 and 5)",
+    description:
+      "n 미만의 자연수 중 3 또는 5의 배수인 수의 총합을 구합니다.",
+    inputDesc: "양의 정수 n.",
+    outputDesc: "n 미만의 3 또는 5의 배수의 합.",
+    solution: "~,{.3%!\\5%!|},{+}*",
+    cases: [
+      { stdin: "10", stdout: "23" },
+      { stdin: "20", stdout: "78" },
+      { stdin: "1000", stdout: "233168", hidden: true },
+    ],
+  },
+  {
+    title: "최대공약수",
+    tier: 12,
+    source: "Rosetta Code - Greatest common divisor (Euclid)",
+    description:
+      "두 양의 정수의 최대공약수(GCD)를 유클리드 호제법으로 구합니다.",
+    inputDesc: "공백으로 구분된 두 양의 정수.",
+    outputDesc: "두 수의 최대공약수.",
+    solution: "~{.@\\%.}do;",
+    cases: [
+      { stdin: "12 18", stdout: "6" },
+      { stdin: "48 36", stdout: "12" },
+      { stdin: "7 13", stdout: "1", hidden: true },
+      { stdin: "100 80", stdout: "20", hidden: true },
+    ],
+  },
+  {
+    title: "최소공배수",
+    tier: 13,
+    source: "Rosetta Code - Least common multiple",
+    description:
+      "두 양의 정수의 최소공배수(LCM)를 구합니다. (a*b/gcd 활용)",
+    inputDesc: "공백으로 구분된 두 양의 정수.",
+    outputDesc: "두 수의 최소공배수.",
+    solution: "~.@.@{.@\\%.}do;/*",
+    cases: [
+      { stdin: "4 6", stdout: "12" },
+      { stdin: "3 5", stdout: "15" },
+      { stdin: "6 8", stdout: "24", hidden: true },
+    ],
+  },
+  {
+    title: "대문자로 변환",
+    tier: 9,
+    source: "Rosetta Code - String case",
+    description:
+      "소문자로만 이루어진 문자열을 모두 대문자로 변환해 출력합니다.",
+    inputDesc: "소문자 알파벳 문자열.",
+    outputDesc: "대문자로 변환된 문자열.",
+    solution: "{32-}%",
+    cases: [
+      { stdin: "hello", stdout: "HELLO" },
+      { stdin: "golf", stdout: "GOLF" },
+      { stdin: "abc", stdout: "ABC", hidden: true },
+    ],
+  },
+  {
+    title: "소문자로 변환",
+    tier: 9,
+    source: "Rosetta Code - String case",
+    description:
+      "대문자로만 이루어진 문자열을 모두 소문자로 변환해 출력합니다.",
+    inputDesc: "대문자 알파벳 문자열.",
+    outputDesc: "소문자로 변환된 문자열.",
+    solution: "{32+}%",
+    cases: [
+      { stdin: "HELLO", stdout: "hello" },
+      { stdin: "GOLF", stdout: "golf" },
+      { stdin: "ABC", stdout: "abc", hidden: true },
+    ],
+  },
+  {
+    title: "n번째 피보나치 수",
+    tier: 13,
+    source: "Rosetta Code - Fibonacci sequence",
+    description:
+      "피보나치 수열 F(0)=0, F(1)=1, F(k)=F(k-1)+F(k-2)에서 F(n)을 구합니다.",
+    inputDesc: "0 이상의 정수 n.",
+    outputDesc: "n번째 피보나치 수.",
+    solution: "~1.@{.@+}*;",
+    cases: [
+      { stdin: "10", stdout: "89" },
+      { stdin: "1", stdout: "1" },
+      { stdin: "15", stdout: "987", hidden: true },
+    ],
+  },
+  {
+    title: "단어 순서 뒤집기",
+    tier: 10,
+    source: "Rosetta Code - Reverse words in a string",
+    description:
+      "공백으로 구분된 단어들의 순서를 거꾸로 뒤집어 출력합니다.",
+    inputDesc: "공백으로 구분된 단어들.",
+    outputDesc: "단어 순서가 뒤집힌 문자열.",
+    solution: "' '/-1%' '*",
+    cases: [
+      { stdin: "a b c", stdout: "c b a" },
+      { stdin: "hello world", stdout: "world hello" },
+      { stdin: "one two three", stdout: "three two one", hidden: true },
+    ],
+  },
+  {
+    title: "자릿수 제곱의 합",
+    tier: 11,
+    source: "Project Euler / Happy number 계열",
+    description:
+      "정수 n의 각 자리 숫자를 제곱하여 모두 더한 값을 출력합니다.",
+    inputDesc: "0 이상의 정수 n.",
+    outputDesc: "각 자리 숫자의 제곱의 합.",
+    solution: "~`{48-.*}%{+}*",
+    cases: [
+      { stdin: "123", stdout: "14" },
+      { stdin: "99", stdout: "162" },
+      { stdin: "10", stdout: "1", hidden: true },
+    ],
+  },
+  {
+    title: "소문자 개수",
+    tier: 10,
+    source: "Rosetta Code - Count occurrences (filter)",
+    description:
+      "문자열에서 소문자 알파벳(a-z)의 개수를 출력합니다.",
+    inputDesc: "대소문자가 섞인 한 줄.",
+    outputDesc: "소문자의 개수.",
+    solution: "{.96>\\123<*},,",
+    cases: [
+      { stdin: "Hello", stdout: "4" },
+      { stdin: "ABC", stdout: "0" },
+      { stdin: "GolfScript", stdout: "8", hidden: true },
+    ],
+  },
+  {
+    title: "콜라츠 다음 수",
+    tier: 11,
+    source: "Project Euler #14 (Collatz) 한 단계",
+    description:
+      "콜라츠 규칙에 따라 다음 수를 출력합니다. 짝수면 2로 나누고, 홀수면 3을 곱해 1을 더합니다.",
+    inputDesc: "양의 정수 n.",
+    outputDesc: "콜라츠 규칙을 한 번 적용한 결과.",
+    solution: "~.2%{3*)}{2/}if",
+    cases: [
+      { stdin: "6", stdout: "3" },
+      { stdin: "7", stdout: "22" },
+      { stdin: "1", stdout: "4", hidden: true },
+      { stdin: "8", stdout: "4", hidden: true },
+    ],
+  },
+  {
+    title: "두 수의 평균 (내림)",
+    tier: 8,
+    source: "Rosetta Code - Averages/Arithmetic mean (2개)",
+    description: "두 정수의 평균을 내림하여 출력합니다.",
+    inputDesc: "공백으로 구분된 두 정수.",
+    outputDesc: "(a + b) / 2 의 몫.",
+    solution: "~+2/",
+    cases: [
+      { stdin: "4 6", stdout: "5" },
+      { stdin: "3 8", stdout: "5" },
+      { stdin: "10 20", stdout: "15", hidden: true },
+    ],
+  },
+  {
+    title: "ASCII 코드 값",
+    tier: 7,
+    source: "Rosetta Code - Character codes",
+    description:
+      "한 글자를 입력받아 그 문자의 ASCII 코드 값을 출력합니다.",
+    inputDesc: "한 개의 문자.",
+    outputDesc: "문자의 ASCII 코드.",
+    solution: "0=",
+    cases: [
+      { stdin: "A", stdout: "65" },
+      { stdin: "a", stdout: "97" },
+      { stdin: "0", stdout: "48", hidden: true },
+    ],
+  },
+  {
+    title: "문자열 이어붙이기",
+    tier: 9,
+    source: "Rosetta Code - String concatenation",
+    description:
+      "두 문자열을 입력 순서대로 이어붙여 출력합니다. 입력은 공백으로 구분된 두 단어입니다.",
+    inputDesc: "공백으로 구분된 두 단어.",
+    outputDesc: "두 단어를 공백 없이 이어붙인 문자열.",
+    solution: "' '-",
+    cases: [
+      { stdin: "foo bar", stdout: "foobar" },
+      { stdin: "code golf", stdout: "codegolf" },
+      { stdin: "a b", stdout: "ab", hidden: true },
+    ],
+  },
+  {
+    title: "제곱근 (정수)",
+    tier: 11,
+    source: "Rosetta Code - Isqrt (integer square root)",
+    description:
+      "정수 n의 정수 제곱근, 즉 제곱이 n 이하인 가장 큰 정수를 출력합니다.",
+    inputDesc: "0 이상의 정수 n.",
+    outputDesc: "floor(√n).",
+    solution: "~:n),{.*n)<},-1=",
+    cases: [
+      { stdin: "30", stdout: "5" },
+      { stdin: "49", stdout: "7" },
+      { stdin: "1", stdout: "1", hidden: true },
+      { stdin: "99", stdout: "9", hidden: true },
+    ],
+  },
+  {
+    title: "약수 목록",
+    tier: 12,
+    source: "Rosetta Code - Factors of an integer",
+    description:
+      "정수 n의 모든 약수를 오름차순으로 공백 구분하여 출력합니다.",
+    inputDesc: "양의 정수 n.",
+    outputDesc: "n의 약수들 (오름차순).",
+    solution: "~:n),1>{n\\%!},' '*",
+    cases: [
+      { stdin: "12", stdout: "1 2 3 4 6 12" },
+      { stdin: "7", stdout: "1 7" },
+      { stdin: "16", stdout: "1 2 4 8 16", hidden: true },
+    ],
+  },
+  {
+    title: "숫자 합이 같아질 때까지",
+    tier: 12,
+    source: "디지털 루트 (Digital root) - Rosetta Code",
+    description:
+      "정수의 자리 숫자를 계속 더해 한 자리가 될 때까지 반복한 값(디지털 루트)을 출력합니다.",
+    inputDesc: "0 이상의 정수 n.",
+    outputDesc: "디지털 루트 (한 자리 수).",
+    solution: "~{`{48-}%{+}*.9>}do",
+    cases: [
+      { stdin: "123", stdout: "6" },
+      { stdin: "9999", stdout: "9" },
+      { stdin: "0", stdout: "0", hidden: true },
+      { stdin: "12345", stdout: "6", hidden: true },
+    ],
+  },
+  {
+    title: "최댓값 빼기 최솟값의 절반",
+    tier: 11,
+    source: "자체 제작 (정렬 응용)",
+    description:
+      "정수들의 (최댓값 - 최솟값)을 2로 나눈 몫을 출력합니다.",
+    inputDesc: "공백으로 구분된 정수들.",
+    outputDesc: "(최댓값 - 최솟값) / 2.",
+    solution: "~]$.-1=\\0=- 2/",
+    cases: [
+      { stdin: "1 10", stdout: "4" },
+      { stdin: "3 9 5", stdout: "3" },
+      { stdin: "0 20 7", stdout: "10", hidden: true },
+    ],
+  },
+  {
+    title: "회문 수 판별",
+    tier: 11,
+    source: "Project Euler #4 (Palindrome) 계열",
+    description:
+      "정수 n을 십진수로 적었을 때 앞뒤가 똑같으면 1, 아니면 0을 출력합니다.",
+    inputDesc: "0 이상의 정수 n.",
+    outputDesc: "회문 수이면 1, 아니면 0.",
+    solution: "~`.-1%=",
+    cases: [
+      { stdin: "121", stdout: "1" },
+      { stdin: "123", stdout: "0" },
+      { stdin: "1221", stdout: "1", hidden: true },
+      { stdin: "10", stdout: "0", hidden: true },
+    ],
+  },
+  {
+    title: "각 단어 첫 글자",
+    tier: 12,
+    source: "Rosetta Code - Acronym / 약어 만들기",
+    description:
+      "공백으로 구분된 단어들의 첫 글자만 모아 출력합니다.",
+    inputDesc: "공백으로 구분된 단어들.",
+    outputDesc: "각 단어의 첫 글자를 이어붙인 문자열.",
+    solution: "' '/{1<}%",
+    cases: [
+      { stdin: "hyper text markup language", stdout: "html" },
+      { stdin: "for your information", stdout: "fyi" },
+      { stdin: "code golf", stdout: "cg", hidden: true },
     ],
   },
 ];

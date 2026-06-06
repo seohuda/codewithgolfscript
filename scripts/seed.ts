@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { runGolfScript } from "../lib/golfscript";
 import { getTierInfo } from "../lib/tiers";
 import P from "./problems.data";
+import META from "./problems.meta";
 import * as fs from "fs";
 import * as path from "path";
 import * as dotenv from "dotenv";
@@ -70,6 +71,20 @@ async function main() {
 
   let number = 1;
   for (const prob of P) {
+    // Resolve metadata: sample input + source. Derive sample output by
+    // running the reference solution on the sample input.
+    const meta = META[prob.title];
+    const sampleInput = meta?.sampleInput ?? "";
+    const source = prob.source ?? meta?.source ?? "자체 제작";
+    let sampleOutput = "";
+    if (meta) {
+      const sr = runGolfScript(prob.solution, sampleInput, {
+        timeoutMs: 3000,
+        maxSteps: 5_000_000,
+      });
+      sampleOutput = normalize(sr.stdout);
+    }
+
     const { data: inserted, error: insErr } = await admin
       .from("problems")
       .insert({
@@ -78,6 +93,9 @@ async function main() {
         input_desc: prob.inputDesc,
         output_desc: prob.outputDesc,
         tier: prob.tier,
+        source,
+        sample_input: sampleInput,
+        sample_output: sampleOutput,
       })
       .select("id")
       .single();
