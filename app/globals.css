@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  background-color: #05060a;
+  color: #c7ccdb;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::selection {
+  background: rgba(139, 92, 246, 0.35);
+  color: #ffffff;
+}
+
+/* Thin, precise scrollbars to match the minimalist aesthetic. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.25);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.45);
+  background-clip: padding-box;
+}
+
+@layer components {
+  .aurora-text {
+    @apply bg-aurora-gradient bg-clip-text text-transparent;
+  }
+
+  .hairline {
+    @apply border border-white/[0.06];
+  }
+
+  .panel {
+    @apply bg-abyss-800/60 backdrop-blur-sm border border-white/[0.06] rounded-xl;
+  }
+
+  .glow-ring {
+    box-shadow:
+      0 0 0 1px rgba(99, 102, 241, 0.18),
+      0 10px 50px -20px rgba(99, 102, 241, 0.55);
+  }
+}
+
+/* Code editor textarea: monospace, calm, no resize handle clutter. */
+.golf-editor {
+  font-family: var(--font-mono, "JetBrains Mono", Menlo, Consolas, monospace);
+  tab-size: 2;
+  line-height: 1.6;
+}
+
+.golf-editor::placeholder {
+  color: rgba(123, 130, 148, 0.55);
+}
