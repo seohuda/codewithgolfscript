@@ -126,7 +126,8 @@ const P: SeedProblem[] = [
   {
     title: "두 배",
     tier: 1,
-    description: "정수 n을 입력받아 2배를 출력합니다.",
+    description:
+      "복사기 앞에 선 종이 한 장. 버튼을 누르면 수가 두 배가 됩니다. 정수 n을 입력받아 2배로 만들어 출력하세요.",
     inputDesc: "정수 n.",
     outputDesc: "2n의 값.",
     solution: "~2*",
@@ -139,7 +140,8 @@ const P: SeedProblem[] = [
   {
     title: "1 더하기",
     tier: 1,
-    description: "정수 n을 입력받아 n + 1을 출력합니다.",
+    description:
+      "엘리베이터가 한 층 올라갑니다. 현재 층 n에서 한 층 위는 몇 층일까요? n + 1을 출력하세요.",
     inputDesc: "정수 n.",
     outputDesc: "n + 1의 값.",
     solution: "~)",
@@ -152,7 +154,8 @@ const P: SeedProblem[] = [
   {
     title: "1 빼기",
     tier: 1,
-    description: "정수 n을 입력받아 n - 1을 출력합니다.",
+    description:
+      "게임의 남은 목숨이 하나 줄었습니다. 현재 목숨 n에서 1을 뺀 값을 출력하세요.",
     inputDesc: "정수 n.",
     outputDesc: "n - 1의 값.",
     solution: "~(",
@@ -331,7 +334,7 @@ const P: SeedProblem[] = [
     title: "짝수 판별",
     tier: 4,
     description:
-      "정수 n이 짝수이면 1, 홀수이면 0을 출력합니다.",
+      "체육 시간, 학생들을 둘씩 짝지으려 합니다. 인원 n이 둘씩 딱 나누어지면(짝수) 1을, 한 명이 남으면(홀수) 0을 출력하세요.",
     inputDesc: "정수 n.",
     outputDesc: "짝수면 1, 아니면 0.",
     solution: "~2%!",
@@ -1730,6 +1733,190 @@ const P: SeedProblem[] = [
       { stdin: "hyper text markup language", stdout: "html" },
       { stdin: "for your information", stdout: "fyi" },
       { stdin: "code golf", stdout: "cg", hidden: true },
+    ],
+  },
+
+  // ---- 정보올림피아드 스타일 (스토리텔링, GolfScript 풀이 가능) -----
+  {
+    title: "직사각형 농장의 울타리",
+    tier: 4,
+    source: "자체 제작 (정올 스타일)",
+    description:
+      "농부 길동이는 가로 w미터, 세로 h미터인 직사각형 농장을 가지고 있습니다. 농장 둘레를 따라 울타리를 치려고 할 때 필요한 울타리의 총 길이를 구해 주세요.",
+    inputDesc: "공백으로 구분된 두 정수 w와 h (농장의 가로와 세로).",
+    outputDesc: "울타리의 총 길이, 즉 2 × (w + h).",
+    solution: "~+2*",
+    cases: [
+      { stdin: "3 5", stdout: "16" },
+      { stdin: "10 10", stdout: "40" },
+      { stdin: "7 2", stdout: "18", hidden: true },
+    ],
+  },
+  {
+    title: "타일 깔기",
+    tier: 3,
+    source: "자체 제작 (정올 스타일)",
+    description:
+      "민지는 가로 w, 세로 h 칸으로 이루어진 직사각형 바닥에 1×1 타일을 빈틈없이 깔려고 합니다. 필요한 타일의 개수는 모두 몇 개일까요?",
+    inputDesc: "공백으로 구분된 두 정수 w와 h.",
+    outputDesc: "필요한 타일의 개수 (w × h).",
+    solution: "~*",
+    cases: [
+      { stdin: "3 5", stdout: "15" },
+      { stdin: "1 1", stdout: "1" },
+      { stdin: "12 8", stdout: "96", hidden: true },
+    ],
+  },
+  {
+    title: "윤년 판별",
+    tier: 8,
+    source: "자체 제작 (정올 스타일)",
+    description:
+      "달력을 만드는 회사에 취직한 여러분의 첫 임무는 윤년을 가려내는 것입니다. 어떤 연도가 4로 나누어떨어지면서 100으로는 나누어떨어지지 않거나, 400으로 나누어떨어지면 윤년입니다. 주어진 연도가 윤년이면 1, 아니면 0을 출력하세요.",
+    inputDesc: "연도를 나타내는 정수 y.",
+    outputDesc: "윤년이면 1, 평년이면 0.",
+    solution: "~:y 4%!y 100%!!y 400%!|&",
+    cases: [
+      { stdin: "2000", stdout: "1" },
+      { stdin: "1900", stdout: "0" },
+      { stdin: "2024", stdout: "1", hidden: true },
+      { stdin: "2023", stdout: "0", hidden: true },
+    ],
+  },
+  {
+    title: "다각형의 내각의 합",
+    tier: 5,
+    source: "자체 제작 (정올 스타일)",
+    description:
+      "수학 시간에 졸던 철수를 위해, 변이 n개인 볼록 다각형의 내각의 합을 대신 구해 주는 프로그램을 만들어 봅시다. n각형의 내각의 합은 (n − 2) × 180도입니다.",
+    inputDesc: "3 이상의 정수 n (다각형의 변의 수).",
+    outputDesc: "내각의 합 (도 단위).",
+    solution: "~2- 180*",
+    cases: [
+      { stdin: "3", stdout: "180" },
+      { stdin: "5", stdout: "540" },
+      { stdin: "4", stdout: "360", hidden: true },
+      { stdin: "12", stdout: "1800", hidden: true },
+    ],
+  },
+  {
+    title: "가장 큰 진약수",
+    tier: 11,
+    source: "자체 제작 (정올 스타일)",
+    description:
+      "보물 상자에는 n개의 금화가 들어 있습니다. 이 금화를 똑같이 나누어 가질 수 있는 가장 큰 그룹의 크기(자기 자신은 제외한 약수 중 최댓값)를 구하세요. n은 합성수라고 가정합니다.",
+    inputDesc: "2 이상의 합성수 n.",
+    outputDesc: "n의 진약수(자신 제외) 중 가장 큰 값.",
+    solution: "~:n,2>{n\\%!},-1=",
+    cases: [
+      { stdin: "12", stdout: "6" },
+      { stdin: "15", stdout: "5" },
+      { stdin: "100", stdout: "50", hidden: true },
+    ],
+  },
+  {
+    title: "사탕 공평하게 나누기",
+    tier: 6,
+    source: "자체 제작 (정올 스타일)",
+    description:
+      "선생님이 사탕 c개를 학생 s명에게 똑같이 나누어 주려고 합니다. 한 명이 받는 사탕 수와, 다 나누어 주고 남는 사탕 수를 차례로 공백으로 구분해 출력하세요.",
+    inputDesc: "공백으로 구분된 두 정수 c와 s (사탕 수, 학생 수).",
+    outputDesc: "한 명이 받는 개수와 남는 개수 (공백 구분).",
+    solution: "~]:a;a 0=a 1=/' '+a 0=a 1=%+",
+    cases: [
+      { stdin: "10 3", stdout: "3 1" },
+      { stdin: "20 4", stdout: "5 0" },
+      { stdin: "7 2", stdout: "3 1", hidden: true },
+    ],
+  },
+  {
+    title: "계단 오르기",
+    tier: 9,
+    source: "자체 제작 (정올 스타일)",
+    description:
+      "지민이는 계단을 한 번에 1칸 또는 2칸씩 오를 수 있습니다. n개의 계단을 오르는 서로 다른 방법의 수를 구하세요. (이 수는 피보나치 수와 같습니다.)",
+    inputDesc: "양의 정수 n (계단의 수).",
+    outputDesc: "계단을 오르는 방법의 수.",
+    solution: "~1.@{.@+}*;",
+    cases: [
+      { stdin: "1", stdout: "1" },
+      { stdin: "5", stdout: "8" },
+      { stdin: "10", stdout: "89", hidden: true },
+    ],
+  },
+  {
+    title: "369 게임",
+    tier: 12,
+    source: "자체 제작 (정올 스타일)",
+    description:
+      "친구들과 369 게임을 합니다. 1부터 n까지 외칠 때, 숫자에 포함된 3, 6, 9의 개수만큼 박수를 쳐야 합니다. n까지 진행하는 동안 쳐야 하는 박수의 총 횟수를 구하세요.",
+    inputDesc: "양의 정수 n.",
+    outputDesc: "박수를 쳐야 하는 총 횟수.",
+    solution: "~),1>{`{48-[3 6 9]\\?-1>},,}%{+}*",
+    cases: [
+      { stdin: "10", stdout: "3" },
+      { stdin: "13", stdout: "4" },
+      { stdin: "33", stdout: "14", hidden: true },
+    ],
+  },
+  {
+    title: "두 분수 크기 비교",
+    tier: 10,
+    source: "자체 제작 (정올 스타일)",
+    description:
+      "두 분수 a/b 와 c/d 가 주어집니다. 어느 쪽이 더 큰지 판단하세요. a/b 가 더 크면 1, c/d 가 더 크면 -1, 같으면 0을 출력합니다. (교차 곱셈 a·d 와 b·c 를 비교합니다. 모든 분모는 양수입니다.)",
+    inputDesc: "공백으로 구분된 네 정수 a b c d.",
+    outputDesc: "비교 결과 (1, -1, 또는 0).",
+    solution: "~]:v;v 0=v 3=*v 1=v 2=*-.0>\\0<-",
+    cases: [
+      { stdin: "1 2 1 3", stdout: "1" },
+      { stdin: "1 3 1 2", stdout: "-1" },
+      { stdin: "2 4 1 2", stdout: "0", hidden: true },
+    ],
+  },
+  {
+    title: "초를 시:분:초로",
+    tier: 11,
+    source: "자체 제작 (정올 스타일)",
+    description:
+      "총 s초가 주어집니다. 이를 시, 분, 초로 환산하여 공백으로 구분해 출력하세요. 예를 들어 3661초는 1시간 1분 1초입니다.",
+    inputDesc: "0 이상의 정수 s (초).",
+    outputDesc: "시 분 초 (공백으로 구분).",
+    solution: "~:s 3600/s 3600%60/s 60%]' '*",
+    cases: [
+      { stdin: "3661", stdout: "1 1 1" },
+      { stdin: "60", stdout: "0 1 0" },
+      { stdin: "7322", stdout: "2 2 2", hidden: true },
+    ],
+  },
+  {
+    title: "최댓값과의 차이",
+    tier: 10,
+    source: "자체 제작 (정올 스타일)",
+    description:
+      "반 학생들의 시험 점수가 주어집니다. 1등(최고점)을 기준으로, 각 학생이 1등과 몇 점 차이가 나는지를 순서대로 공백으로 구분해 출력하세요.",
+    inputDesc: "공백으로 구분된 점수들.",
+    outputDesc: "각 점수와 최댓값의 차이 (원래 순서).",
+    solution: "~]:a$-1=:m;a{m\\-}%' '*",
+    cases: [
+      { stdin: "90 80 100 70", stdout: "10 20 0 30" },
+      { stdin: "50 50", stdout: "0 0" },
+      { stdin: "1 2 3", stdout: "2 1 0", hidden: true },
+    ],
+  },
+  {
+    title: "등차수열의 합",
+    tier: 9,
+    source: "자체 제작 (정올 스타일)",
+    description:
+      "첫째 항이 a이고 공차가 d인 등차수열의 처음 n개 항을 모두 더한 값을 구하세요. (예: a=2, d=3, n=4 이면 2+5+8+11 = 26.)",
+    inputDesc: "공백으로 구분된 세 정수 a d n.",
+    outputDesc: "처음 n개 항의 합.",
+    solution: "~]:v 2=,{v 1=*v 0=+}%{+}*",
+    cases: [
+      { stdin: "2 3 4", stdout: "26" },
+      { stdin: "1 1 5", stdout: "15" },
+      { stdin: "5 0 3", stdout: "15", hidden: true },
     ],
   },
 ];

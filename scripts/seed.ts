@@ -3,6 +3,7 @@ import { runGolfScript } from "../lib/golfscript";
 import { getTierInfo } from "../lib/tiers";
 import P from "./problems.data";
 import META from "./problems.meta";
+import { getStep } from "./problems.steps";
 import * as fs from "fs";
 import * as path from "path";
 import * as dotenv from "dotenv";
@@ -96,6 +97,8 @@ async function main() {
         source,
         sample_input: sampleInput,
         sample_output: sampleOutput,
+        step_group: getStep(prob.title).group,
+        step_order: getStep(prob.title).order,
       })
       .select("id")
       .single();

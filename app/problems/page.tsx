@@ -16,7 +16,8 @@ async function fetchProblems(): Promise<ProblemRow[]> {
       .from("problems")
       .select("id, title, description, input_desc, output_desc, tier, created_at")
       .order("tier", { ascending: true })
-      .order("id", { ascending: true });
+      .order("id", { ascending: true })
+      .range(0, 999);
     if (error || !data) return [];
     return data as ProblemRow[];
   } catch {

@@ -66,11 +66,11 @@ export default async function HomePage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Link href="/problems" className="btn-filled whitespace-nowrap">
-            문제 풀기
+          <Link href="/steps" className="btn-filled whitespace-nowrap">
+            단계별로 풀기
           </Link>
-          <Link href="/board" className="btn-outlined whitespace-nowrap">
-            게시판
+          <Link href="/problems" className="btn-outlined whitespace-nowrap">
+            전체 문제
           </Link>
         </div>
       </section>

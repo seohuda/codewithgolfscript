@@ -32,10 +32,16 @@ export default function RootLayout({
 
               <nav className="hidden items-center gap-1 text-sm md:flex">
                 <Link
+                  href="/steps"
+                  className="rounded-md px-3 py-1.5 font-medium text-ink-soft transition-colors hover:bg-surface-variant hover:text-ink"
+                >
+                  단계별로 풀기
+                </Link>
+                <Link
                   href="/problems"
                   className="rounded-md px-3 py-1.5 font-medium text-ink-soft transition-colors hover:bg-surface-variant hover:text-ink"
                 >
-                  문제
+                  전체 문제
                 </Link>
                 <Link
                   href="/board"

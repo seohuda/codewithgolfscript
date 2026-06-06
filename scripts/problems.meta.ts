@@ -302,6 +302,18 @@ const META: Record<string, ProblemMeta> = {
     sampleInput: "what you see",
     source: "Rosetta Code - Acronym",
   },
+  "직사각형 농장의 울타리": { sampleInput: "4 6", source: "자체 제작 (정올 스타일)" },
+  "타일 깔기": { sampleInput: "4 6", source: "자체 제작 (정올 스타일)" },
+  "윤년 판별": { sampleInput: "2100", source: "자체 제작 (정올 스타일)" },
+  "다각형의 내각의 합": { sampleInput: "6", source: "자체 제작 (정올 스타일)" },
+  "가장 큰 진약수": { sampleInput: "18", source: "자체 제작 (정올 스타일)" },
+  "사탕 공평하게 나누기": { sampleInput: "17 5", source: "자체 제작 (정올 스타일)" },
+  "계단 오르기": { sampleInput: "6", source: "자체 제작 (정올 스타일)" },
+  "369 게임": { sampleInput: "20", source: "자체 제작 (정올 스타일)" },
+  "두 분수 크기 비교": { sampleInput: "3 4 2 3", source: "자체 제작 (정올 스타일)" },
+  "초를 시:분:초로": { sampleInput: "3725", source: "자체 제작 (정올 스타일)" },
+  "최댓값과의 차이": { sampleInput: "80 95 60", source: "자체 제작 (정올 스타일)" },
+  "등차수열의 합": { sampleInput: "3 2 5", source: "자체 제작 (정올 스타일)" },
 };
 
 export default META;
