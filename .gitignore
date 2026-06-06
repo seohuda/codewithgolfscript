@@ -35,3 +35,7 @@ next-env.d.ts
 
 # auto-commit log
 auto-commit.log
+
+# private solutions (answers) — never commit
+/solutions
+gstest.mts

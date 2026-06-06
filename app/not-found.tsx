@@ -2,17 +2,14 @@ import Link from "next/link";
 
 export default function NotFound() {
   return (
-    <div className="flex min-h-[50vh] flex-col items-center justify-center gap-6 text-center">
-      <p className="aurora-text font-mono text-6xl font-bold">404</p>
-      <h1 className="text-xl font-medium text-mist">문제를 찾을 수 없습니다</h1>
-      <p className="max-w-sm text-sm text-mist-soft">
-        존재하지 않는 문제이거나, 아직 데이터베이스에 등록되지 않았습니다.
+    <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 text-center">
+      <p className="text-6xl font-bold text-primary">404</p>
+      <h1 className="text-xl font-semibold text-ink">페이지를 찾을 수 없습니다</h1>
+      <p className="max-w-sm text-sm text-ink-soft">
+        존재하지 않는 페이지이거나, 아직 등록되지 않았습니다.
       </p>
-      <Link
-        href="/"
-        className="rounded-lg border border-aurora-indigo/40 px-4 py-2 text-sm text-mist transition-colors hover:bg-aurora-indigo/10 hover:text-white"
-      >
-        문제 목록으로
+      <Link href="/" className="btn-outlined">
+        홈으로
       </Link>
     </div>
   );

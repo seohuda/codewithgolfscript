@@ -1,90 +1,98 @@
 import Link from "next/link";
 import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
-import { Problem } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
-async function fetchProblems(): Promise<Problem[]> {
+async function getStats(): Promise<{ problems: number; users: number }> {
   try {
     const admin = getSupabaseAdminClient();
-    const { data, error } = await admin
-      .from("problems")
-      .select("id, title, description, input_desc, output_desc, created_at")
-      .order("id", { ascending: true });
-
-    if (error || !data) return [];
-    return data as Problem[];
+    const [{ count: problems }, { count: users }] = await Promise.all([
+      admin.from("problems").select("*", { count: "exact", head: true }),
+      admin.from("users").select("*", { count: "exact", head: true }),
+    ]);
+    return { problems: problems ?? 0, users: users ?? 0 };
   } catch {
-    return [];
+    return { problems: 0, users: 0 };
   }
 }
 
 export default async function HomePage() {
-  const problems = await fetchProblems();
+  const stats = await getStats();
 
   return (
-    <div className="animate-fade-in space-y-12">
-      <section className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-abyss-800/40 px-8 py-14">
-        <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-aurora-violet/20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-24 left-1/3 h-72 w-72 rounded-full bg-aurora-cyan/10 blur-3xl" />
-        <div className="relative max-w-2xl">
-          <p className="mb-3 text-xs font-medium uppercase tracking-[0.3em] text-aurora-glow">
-            GolfScript 전용
+    <div className="animate-fade-in space-y-8">
+      {/* Hero */}
+      <section className="overflow-hidden rounded-2xl border border-surface-border bg-surface shadow-e1">
+        <div className="bg-gradient-to-br from-primary to-primary-light px-8 py-12 text-white">
+          <p className="mb-2 text-sm font-medium opacity-90">
+            GolfScript 전용 숏코딩 채점소
           </p>
-          <h1 className="text-4xl font-semibold leading-tight tracking-tight text-mist md:text-5xl">
-            가장 적은 <span className="aurora-text">바이트</span>로 승리하세요.
+          <h1 className="text-3xl font-bold leading-tight md:text-4xl">
+            가장 적은 바이트로 푸세요
           </h1>
-          <p className="mt-5 max-w-xl text-base leading-relaxed text-mist-soft">
-            매니아를 위한 숏코딩 채점소입니다. 모든 풀이는 정확한 UTF-8 바이트
-            크기로 측정됩니다. 문제를 풀고, 신호만 남을 때까지 코드를 줄여
-            보세요.
+          <p className="mt-3 max-w-xl text-sm leading-relaxed opacity-90">
+            정답 여부가 아니라 코드의 바이트 수로 순위가 매겨지는 곳. solved.ac
+            스타일의 티어로 실력을 확인하고, 한 글자라도 더 줄여 보세요.
           </p>
+          <div className="mt-6 flex gap-3">
+            <Link
+              href="/problems"
+              className="inline-flex items-center rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-primary shadow-e1 transition-shadow hover:shadow-e2"
+            >
+              문제 풀러 가기
+            </Link>
+            <Link
+              href="/signup"
+              className="inline-flex items-center rounded-lg border border-white/40 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+            >
+              회원가입
+            </Link>
+          </div>
         </div>
       </section>
 
-      <section>
-        <div className="mb-6 flex items-end justify-between">
-          <h2 className="text-lg font-medium tracking-wide text-mist">문제</h2>
-          <span className="text-xs text-mist-dim">{problems.length}개</span>
+      {/* Stats */}
+      <section className="grid grid-cols-2 gap-4">
+        <div className="card p-6">
+          <p className="text-sm text-ink-soft">등록된 문제</p>
+          <p className="mt-1 text-3xl font-bold text-ink">{stats.problems}</p>
         </div>
+        <div className="card p-6">
+          <p className="text-sm text-ink-soft">가입한 유저</p>
+          <p className="mt-1 text-3xl font-bold text-ink">{stats.users}</p>
+        </div>
+      </section>
 
-        {problems.length === 0 ? (
-          <div className="panel px-6 py-12 text-center">
-            <p className="text-sm text-mist-soft">
-              문제를 찾을 수 없습니다. Supabase를 설정하고{" "}
-              <code className="rounded bg-abyss-700 px-1.5 py-0.5 font-mono text-xs text-aurora-glow">
-                sql/schema.sql
-              </code>{" "}
-              을 실행해 데이터를 추가하세요.
+      {/* Quick links */}
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <Link
+          href="/problems"
+          className="card group flex items-center justify-between p-6 transition-shadow hover:shadow-e2"
+        >
+          <div>
+            <h3 className="text-lg font-semibold text-ink">문제 목록</h3>
+            <p className="mt-1 text-sm text-ink-soft">
+              티어별로 정렬된 100문제에 도전하세요.
             </p>
           </div>
-        ) : (
-          <ul className="grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-white/[0.06] bg-white/[0.04] md:grid-cols-2 lg:grid-cols-3">
-            {problems.map((p) => (
-              <li key={p.id} className="bg-abyss-800/60">
-                <Link
-                  href={`/problems/${p.id}`}
-                  className="group flex h-full flex-col gap-3 p-6 transition-colors hover:bg-abyss-700/60"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs text-mist-dim">
-                      #{String(p.id).padStart(3, "0")}
-                    </span>
-                    <span className="text-[10px] uppercase tracking-widest text-aurora-glow opacity-0 transition-opacity group-hover:opacity-100">
-                      풀기 &rarr;
-                    </span>
-                  </div>
-                  <h3 className="text-base font-medium text-mist transition-colors group-hover:text-white">
-                    {p.title}
-                  </h3>
-                  <p className="line-clamp-2 text-sm leading-relaxed text-mist-soft">
-                    {p.description}
-                  </p>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
+          <span className="text-2xl text-primary transition-transform group-hover:translate-x-1">
+            →
+          </span>
+        </Link>
+        <Link
+          href="/board"
+          className="card group flex items-center justify-between p-6 transition-shadow hover:shadow-e2"
+        >
+          <div>
+            <h3 className="text-lg font-semibold text-ink">게시판</h3>
+            <p className="mt-1 text-sm text-ink-soft">
+              풀이를 공유하고 질문을 나눠 보세요.
+            </p>
+          </div>
+          <span className="text-2xl text-primary transition-transform group-hover:translate-x-1">
+            →
+          </span>
+        </Link>
       </section>
     </div>
   );

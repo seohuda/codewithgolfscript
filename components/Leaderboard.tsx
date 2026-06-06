@@ -6,19 +6,12 @@ import { LeaderboardRow } from "@/lib/types";
 
 interface LeaderboardProps {
   problemId: number;
-  /** Bumping this value triggers a refetch (e.g. after a new AC). */
   refreshKey?: number;
-}
-
-function formatBytes(bytes: number): string {
-  return `${bytes} B`;
 }
 
 function formatTime(iso: string): string {
   try {
-    const d = new Date(iso);
-    return d.toLocaleString("ko-KR", {
-      year: "numeric",
+    return new Date(iso).toLocaleString("ko-KR", {
       month: "short",
       day: "2-digit",
       hour: "2-digit",
@@ -29,11 +22,11 @@ function formatTime(iso: string): string {
   }
 }
 
-function rankBadge(rank: number): string {
-  if (rank === 1) return "text-aurora-cyan";
-  if (rank === 2) return "text-aurora-glow";
-  if (rank === 3) return "text-aurora-violet";
-  return "text-mist-dim";
+function rankColor(rank: number): string {
+  if (rank === 1) return "#e37400";
+  if (rank === 2) return "#5f6368";
+  if (rank === 3) return "#ad5600";
+  return "#80868b";
 }
 
 export default function Leaderboard({
@@ -41,12 +34,11 @@ export default function Leaderboard({
   refreshKey = 0,
 }: LeaderboardProps) {
   const [rows, setRows] = useState<LeaderboardRow[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-
     async function load() {
       setLoading(true);
       setError(null);
@@ -59,9 +51,7 @@ export default function Leaderboard({
           .order("bytes", { ascending: true })
           .order("created_at", { ascending: true })
           .limit(100);
-
         if (cancelled) return;
-
         if (qErr) {
           setError(qErr.message);
           setRows([]);
@@ -70,14 +60,13 @@ export default function Leaderboard({
         }
       } catch (e) {
         if (!cancelled) {
-          setError(e instanceof Error ? e.message : "Failed to load leaderboard.");
+          setError(e instanceof Error ? e.message : "불러오기 실패");
           setRows([]);
         }
       } finally {
         if (!cancelled) setLoading(false);
       }
     }
-
     load();
     return () => {
       cancelled = true;
@@ -85,85 +74,58 @@ export default function Leaderboard({
   }, [problemId, refreshKey]);
 
   return (
-    <div className="panel overflow-hidden">
-      <div className="flex items-center justify-between border-b border-white/[0.06] px-5 py-4">
-        <h3 className="text-sm font-medium tracking-wide text-mist">
-          리더보드
-        </h3>
-        <span className="text-[10px] uppercase tracking-[0.2em] text-mist-dim">
-          바이트 &uarr; · 시간 &uarr;
-        </span>
+    <div className="card mt-6 overflow-hidden">
+      <div className="flex items-center justify-between border-b border-surface-border bg-surface-dim px-4 py-3">
+        <h3 className="text-sm font-bold text-ink">랭킹</h3>
+        <span className="text-xs text-ink-faint">바이트 ↑ · 시간 ↑</span>
       </div>
-
       {loading ? (
-        <div className="px-5 py-10 text-center text-sm text-mist-dim">
-          순위를 불러오는 중&hellip;
+        <div className="px-4 py-8 text-center text-sm text-ink-faint">
+          불러오는 중…
         </div>
       ) : error ? (
-        <div className="px-5 py-10 text-center text-sm text-mist-soft">
-          리더보드를 불러오지 못했습니다.
-          <span className="mt-1 block text-xs text-mist-dim">{error}</span>
+        <div className="px-4 py-8 text-center text-sm text-ink-soft">
+          랭킹을 불러오지 못했습니다.
         </div>
       ) : rows.length === 0 ? (
-        <div className="px-5 py-10 text-center text-sm text-mist-dim">
-          아직 정답이 없습니다. 첫{" "}
-          <span className="font-mono text-aurora-cyan">AC</span>의 주인공이
-          되어 보세요.
+        <div className="px-4 py-8 text-center text-sm text-ink-faint">
+          아직 정답이 없습니다. 첫 번째로 풀어 보세요!
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-sm">
-            <thead>
-              <tr className="text-left text-[11px] uppercase tracking-wider text-mist-dim">
-                <th className="border-b border-white/[0.06] px-5 py-3 font-medium">
-                  #
-                </th>
-                <th className="border-b border-white/[0.06] px-5 py-3 font-medium">
-                  유저
-                </th>
-                <th className="border-b border-white/[0.06] px-5 py-3 text-right font-medium">
-                  바이트
-                </th>
-                <th className="border-b border-white/[0.06] px-5 py-3 text-right font-medium">
-                  제출 시각
-                </th>
+        <table className="w-full border-collapse text-sm">
+          <thead>
+            <tr className="border-b border-surface-border text-left text-xs font-semibold text-ink-soft">
+              <th className="w-16 px-4 py-2.5">순위</th>
+              <th className="px-4 py-2.5">유저</th>
+              <th className="px-4 py-2.5 text-right">바이트</th>
+              <th className="px-4 py-2.5 text-right">시각</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr
+                key={`${row.user_id}-${row.created_at}`}
+                className="border-b border-surface-border last:border-0 hover:bg-surface-dim"
+              >
+                <td className="px-4 py-2.5">
+                  <span
+                    className="font-mono font-bold"
+                    style={{ color: rankColor(row.rank) }}
+                  >
+                    {row.rank}
+                  </span>
+                </td>
+                <td className="px-4 py-2.5 text-ink">{row.username}</td>
+                <td className="px-4 py-2.5 text-right font-mono font-semibold text-primary">
+                  {row.bytes}
+                </td>
+                <td className="px-4 py-2.5 text-right font-mono text-xs text-ink-faint">
+                  {formatTime(row.created_at)}
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {rows.map((row) => (
-                <tr
-                  key={`${row.user_id}-${row.created_at}`}
-                  className="group transition-colors hover:bg-white/[0.03]"
-                >
-                  <td className="border-b border-white/[0.04] px-5 py-3">
-                    <span
-                      className={`font-mono text-sm font-semibold ${rankBadge(
-                        row.rank,
-                      )}`}
-                    >
-                      {row.rank}
-                    </span>
-                  </td>
-                  <td className="border-b border-white/[0.04] px-5 py-3">
-                    <span className="text-mist transition-colors group-hover:text-white">
-                      {row.username}
-                    </span>
-                  </td>
-                  <td className="border-b border-white/[0.04] px-5 py-3 text-right">
-                    <span className="font-mono text-aurora-glow">
-                      {formatBytes(row.bytes)}
-                    </span>
-                  </td>
-                  <td className="border-b border-white/[0.04] px-5 py-3 text-right">
-                    <span className="font-mono text-xs text-mist-dim">
-                      {formatTime(row.created_at)}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       )}
     </div>
   );

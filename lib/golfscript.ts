@@ -298,7 +298,9 @@ class Interpreter {
         }
         return;
       }
-      // Unknown name: no-op (treated as undefined variable).
+      // Not a user variable: try built-in word operators
+      // (abs, if, do, while, print, p, puts, ...). Unknown = no-op.
+      this.execOperator(tok);
       return;
     }
     // Operator
@@ -445,6 +447,10 @@ class Interpreter {
         this.push(num(Math.abs(a.n ?? 0)));
         return;
       }
+      case "base": {
+        this.opBase();
+        return;
+      }
       default:
         // Unknown operator: ignore (no-op).
         return;
@@ -453,6 +459,42 @@ class Interpreter {
 
   // Buffer for explicit print/puts output (prepended to final stack dump).
   outBuffer = "";
+
+  /**
+   * `base` operator.
+   *  - num base num  → digit array of `num` in the given base (big-endian)
+   *  - arr base num  → interpret digit array as a number in the given base
+   */
+  private opBase() {
+    const b = this.pop(); // base
+    const a = this.pop(); // value or digit array
+    const radix = b.n ?? 0;
+    if (radix < 2) {
+      this.push(arr([]));
+      return;
+    }
+    if (a.t === "num") {
+      let v = Math.abs(Math.trunc(a.n ?? 0));
+      const digits: GSVal[] = [];
+      if (v === 0) {
+        this.push(arr([num(0)]));
+        return;
+      }
+      while (v > 0) {
+        digits.unshift(num(v % radix));
+        v = Math.floor(v / radix);
+      }
+      this.push(arr(digits));
+      return;
+    }
+    // array → number
+    const items = toArr(a);
+    let acc = 0;
+    for (const d of items) {
+      acc = acc * radix + (d.n ?? 0);
+    }
+    this.push(num(acc));
+  }
 
   private opTilde() {
     const a = this.pop();
@@ -540,6 +582,25 @@ class Interpreter {
       const blk = a.t === "block" ? a : b;
       const count = Math.max(0, numVal.n ?? 0);
       for (let i = 0; i < count; i++) this.execBlockVal(blk);
+      return;
+    }
+
+    // sequence * block (or block * sequence) → fold/reduce
+    if (
+      (a.t !== "num" && b.t === "block") ||
+      (a.t === "block" && b.t !== "num")
+    ) {
+      const blk = a.t === "block" ? a : b;
+      const seq = a.t === "block" ? b : a;
+      const items = toArr(seq);
+      if (items.length === 0) {
+        return;
+      }
+      this.push(items[0]);
+      for (let i = 1; i < items.length; i++) {
+        this.push(items[i]);
+        this.execBlockVal(blk);
+      }
       return;
     }
 

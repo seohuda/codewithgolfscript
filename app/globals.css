@@ -3,15 +3,15 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 html,
 body {
   padding: 0;
   margin: 0;
-  background-color: #05060a;
-  color: #c7ccdb;
+  background-color: #f8f9fa;
+  color: #202124;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -21,53 +21,63 @@ body {
 }
 
 ::selection {
-  background: rgba(139, 92, 246, 0.35);
-  color: #ffffff;
+  background: rgba(26, 115, 232, 0.18);
+  color: #202124;
 }
 
-/* Thin, precise scrollbars to match the minimalist aesthetic. */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #f1f3f4;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(99, 102, 241, 0.25);
+  background: #dadce0;
   border-radius: 9999px;
-  border: 2px solid transparent;
+  border: 3px solid #f1f3f4;
   background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(139, 92, 246, 0.45);
+  background: #bdc1c6;
   background-clip: padding-box;
 }
 
 @layer components {
-  .aurora-text {
-    @apply bg-aurora-gradient bg-clip-text text-transparent;
+  /* Material-style elevated card */
+  .card {
+    @apply rounded-xl border border-surface-border bg-surface shadow-e1;
   }
 
-  .hairline {
-    @apply border border-white/[0.06];
+  /* Filled (primary) button */
+  .btn-filled {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white shadow-e1 transition-all hover:bg-primary-dark hover:shadow-e2 active:shadow-e1 disabled:cursor-not-allowed disabled:bg-ink-faint disabled:shadow-none;
   }
 
-  .panel {
-    @apply bg-abyss-800/60 backdrop-blur-sm border border-white/[0.06] rounded-xl;
+  /* Outlined button */
+  .btn-outlined {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-surface-border bg-surface px-5 py-2.5 text-sm font-medium text-primary transition-colors hover:bg-primary-container/40 disabled:cursor-not-allowed disabled:text-ink-faint;
   }
 
-  .glow-ring {
-    box-shadow:
-      0 0 0 1px rgba(99, 102, 241, 0.18),
-      0 10px 50px -20px rgba(99, 102, 241, 0.55);
+  /* Text button */
+  .btn-text {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary-container/40;
+  }
+
+  /* Text field */
+  .field {
+    @apply w-full rounded-lg border border-surface-border bg-surface px-3.5 py-2.5 text-sm text-ink outline-none transition-colors placeholder:text-ink-faint focus:border-primary focus:ring-2 focus:ring-primary/20;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full border border-surface-border bg-surface-variant px-2.5 py-0.5 text-xs font-medium text-ink-soft;
   }
 }
 
-/* Code editor textarea: monospace, calm, no resize handle clutter. */
+/* Code editor textarea */
 .golf-editor {
   font-family: var(--font-mono, "JetBrains Mono", Menlo, Consolas, monospace);
   tab-size: 2;
@@ -75,5 +85,5 @@ body {
 }
 
 .golf-editor::placeholder {
-  color: rgba(123, 130, 148, 0.55);
+  color: #9aa0a6;
 }
