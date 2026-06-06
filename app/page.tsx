@@ -112,7 +112,9 @@ export default async function HomePage() {
                         </Link>
                       </td>
                       <td className="hidden px-4 py-3 text-right text-xs text-ink-faint sm:table-cell">
-                        {p.source || "자체 제작"}
+                        {p.source && !p.source.startsWith("자체 제작")
+                          ? p.source
+                          : ""}
                       </td>
                     </tr>
                   ))}

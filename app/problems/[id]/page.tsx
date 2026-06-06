@@ -54,7 +54,7 @@ export default async function ProblemPage({
         <h1 className="text-2xl font-bold text-ink">{problem.title}</h1>
       </div>
 
-      {problem.source && (
+      {problem.source && !problem.source.startsWith("자체 제작") && (
         <p className="text-xs text-ink-faint">
           출처: <span className="text-ink-soft">{problem.source}</span>
         </p>
