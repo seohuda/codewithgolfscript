@@ -6,9 +6,36 @@ import {
   SESSION_COOKIE,
   SESSION_COOKIE_OPTIONS,
 } from "@/lib/auth";
+import { generateToken, RESET_TOKEN_TTL_MS } from "@/lib/tokens";
+import { sendPasswordResetEmail, siteUrl } from "@/lib/email";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+const MAX_ATTEMPTS = 5;
+const LOCKOUT_MS = 30 * 60 * 1000; // 30 minutes
+
+// Sends a password-reset email when an account gets locked. Best-effort.
+async function sendLockoutReset(
+  admin: ReturnType<typeof getSupabaseAdminClient>,
+  userId: string,
+  email: string | null,
+) {
+  if (!email) return;
+  try {
+    const { raw, hash } = generateToken();
+    await admin.from("auth_tokens").insert({
+      user_id: userId,
+      token_hash: hash,
+      type: "reset_password",
+      expires_at: new Date(Date.now() + RESET_TOKEN_TTL_MS).toISOString(),
+    });
+    const link = `${siteUrl()}/reset-password?token=${raw}`;
+    await sendPasswordResetEmail(email, link);
+  } catch (e) {
+    console.error("lockout reset email failed:", e);
+  }
+}
 
 export async function POST(req: NextRequest) {
   let body: { username?: string; password?: string };
@@ -32,7 +59,9 @@ export async function POST(req: NextRequest) {
 
   const { data: user, error } = await admin
     .from("users")
-    .select("id, username, password_hash, is_admin, email_verified")
+    .select(
+      "id, username, password_hash, is_admin, email_verified, email, failed_login_count, lockout_until",
+    )
     .ilike("username", username)
     .maybeSingle();
 
@@ -50,7 +79,61 @@ export async function POST(req: NextRequest) {
   );
 
   if (!user || !user.password_hash) return invalid;
-  if (!verifyPassword(password, user.password_hash as string)) return invalid;
+
+  // Account currently locked?
+  if (user.lockout_until && new Date(user.lockout_until as string) > new Date()) {
+    const mins = Math.ceil(
+      (new Date(user.lockout_until as string).getTime() - Date.now()) / 60000,
+    );
+    return NextResponse.json(
+      {
+        error: `비밀번호를 여러 번 틀려 계정이 잠겼습니다. 가입한 이메일로 비밀번호 재설정 링크를 보냈습니다. (${mins}분 후 다시 시도 가능)`,
+        locked: true,
+      },
+      { status: 423 },
+    );
+  }
+
+  // Wrong password → increment the failure counter, lock at the limit.
+  if (!verifyPassword(password, user.password_hash as string)) {
+    const prev = (user.failed_login_count as number) ?? 0;
+    const next = prev + 1;
+
+    if (next >= MAX_ATTEMPTS) {
+      await admin
+        .from("users")
+        .update({
+          failed_login_count: next,
+          lockout_until: new Date(Date.now() + LOCKOUT_MS).toISOString(),
+        })
+        .eq("id", user.id);
+      await sendLockoutReset(
+        admin,
+        user.id as string,
+        (user.email as string) ?? null,
+      );
+      return NextResponse.json(
+        {
+          error:
+            "비밀번호를 5회 틀려 계정이 잠겼습니다. 가입한 이메일로 비밀번호 재설정 링크를 보냈습니다.",
+          locked: true,
+        },
+        { status: 423 },
+      );
+    }
+
+    await admin
+      .from("users")
+      .update({ failed_login_count: next })
+      .eq("id", user.id);
+    const remaining = MAX_ATTEMPTS - next;
+    return NextResponse.json(
+      {
+        error: `아이디 또는 비밀번호가 올바르지 않습니다. (남은 시도 ${remaining}회)`,
+      },
+      { status: 401 },
+    );
+  }
 
   // Email verification is required before logging in.
   if (!user.email_verified) {
@@ -61,6 +144,14 @@ export async function POST(req: NextRequest) {
       },
       { status: 403 },
     );
+  }
+
+  // Successful login → reset the failure counter and any lockout.
+  if ((user.failed_login_count as number) > 0 || user.lockout_until) {
+    await admin
+      .from("users")
+      .update({ failed_login_count: 0, lockout_until: null })
+      .eq("id", user.id);
   }
 
   const token = createSessionToken({
