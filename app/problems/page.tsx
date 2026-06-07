@@ -151,6 +151,7 @@ export default function ProblemsPage() {
       params.set("page", String(page));
       if (stepGroup) params.set("group", stepGroup);
       if (tag) params.set("tag", tag);
+      if (unsolvedOnly) params.set("unsolved", "1");
       const opt = TIER_OPTIONS.find((o) => o.value === tierGroup);
       if (opt && opt.min !== undefined) {
         params.set("tierMin", String(opt.min));
@@ -173,7 +174,7 @@ export default function ProblemsPage() {
     } finally {
       setLoading(false);
     }
-  }, [query, sort, page, tierGroup, stepGroup, tag]);
+  }, [query, sort, page, tierGroup, stepGroup, tag, unsolvedOnly]);
 
   useEffect(() => {
     load();
@@ -191,9 +192,7 @@ export default function ProblemsPage() {
     return "none";
   }
 
-  const visibleRows = unsolvedOnly
-    ? rows.filter((p) => !solved.has(p.id))
-    : rows;
+  const visibleRows = rows;
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const pageNumbers: number[] = [];
@@ -293,7 +292,10 @@ export default function ProblemsPage() {
             <input
               type="checkbox"
               checked={unsolvedOnly}
-              onChange={(e) => setUnsolvedOnly(e.target.checked)}
+              onChange={(e) => {
+                setUnsolvedOnly(e.target.checked);
+                setPage(1);
+              }}
               className="h-4 w-4 accent-accent"
             />
             안 푼 문제만 보기
@@ -311,7 +313,7 @@ export default function ProblemsPage() {
           {query
             ? `"${query}" 검색 결과가 없습니다.`
             : unsolvedOnly
-              ? "이 페이지의 문제를 모두 풀었습니다!"
+              ? "안 푼 문제가 없습니다. 모든 문제를 풀었어요!"
               : "문제가 없습니다."}
         </div>
       ) : (

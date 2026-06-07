@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
+import { verifySessionToken, SESSION_COOKIE } from "@/lib/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 20;
 
-// GET /api/problems?q=&tierMin=&tierMax=&group=&sort=tier|id&page=1
+// GET /api/problems?q=&tierMin=&tierMax=&group=&tag=&unsolved=1&sort=tier|id&page=1
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const q = (searchParams.get("q") ?? "").trim();
@@ -14,11 +15,32 @@ export async function GET(req: NextRequest) {
   const tierMax = searchParams.get("tierMax");
   const group = (searchParams.get("group") ?? "").trim();
   const tag = (searchParams.get("tag") ?? "").trim();
+  const unsolved = searchParams.get("unsolved") === "1";
   const sort = searchParams.get("sort") === "id" ? "id" : "tier";
   const page = Math.max(1, Number(searchParams.get("page") ?? "1") || 1);
 
   try {
     const admin = getSupabaseAdminClient();
+
+    // When "unsolved only" is requested, resolve the logged-in user's
+    // solved problem ids so we can exclude them server-side (across all
+    // pages, not just the current one).
+    let solvedIds: number[] = [];
+    if (unsolved) {
+      const session = verifySessionToken(
+        req.cookies.get(SESSION_COOKIE)?.value,
+      );
+      if (session) {
+        const { data: subs } = await admin
+          .from("submissions")
+          .select("problem_id")
+          .eq("user_id", session.userId)
+          .eq("verdict", "AC")
+          .range(0, 99999);
+        solvedIds = [...new Set((subs ?? []).map((s) => s.problem_id as number))];
+      }
+    }
+
     let query = admin
       .from("problems")
       .select("id, title, tier, source, step_group, tags", { count: "exact" });
@@ -30,6 +52,9 @@ export async function GET(req: NextRequest) {
     }
     if (group) query = query.eq("step_group", group);
     if (tag) query = query.contains("tags", [tag]);
+    if (unsolved && solvedIds.length > 0) {
+      query = query.not("id", "in", `(${solvedIds.join(",")})`);
+    }
     if (tierMin !== null && tierMin !== "") {
       const t = Number(tierMin);
       if (Number.isFinite(t)) query = query.gte("tier", t);
