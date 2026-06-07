@@ -50,6 +50,7 @@ export default function EditProblemPage() {
           step_order: p.step_order ?? 0,
           sample_input: p.sample_input ?? "",
           sample_output: p.sample_output ?? "",
+          image_url: p.image_url ?? "",
         });
         setCases(
           (data.cases ?? []).map((c: TestCaseDraft) => ({

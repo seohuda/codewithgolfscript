@@ -14,7 +14,7 @@ async function fetchProblem(id: number): Promise<Problem | null> {
     const { data, error } = await admin
       .from("problems")
       .select(
-        "id, title, description, input_desc, output_desc, tier, source, sample_input, sample_output, created_at",
+        "id, title, description, input_desc, output_desc, tier, source, sample_input, sample_output, image_url, created_at",
       )
       .eq("id", id)
       .maybeSingle();
@@ -70,6 +70,14 @@ export default async function ProblemPage({
             <p className="whitespace-pre-wrap text-sm leading-relaxed text-ink-soft">
               {problem.description}
             </p>
+            {problem.image_url && (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                src={problem.image_url}
+                alt={`${problem.title} 이미지`}
+                className="mt-4 max-w-full border border-surface-border"
+              />
+            )}
           </div>
           <div className="card p-6">
             <h2 className="mb-2 text-sm font-bold text-ink">입력</h2>

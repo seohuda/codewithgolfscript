@@ -17,6 +17,7 @@ const emptyDraft: ProblemDraft = {
   step_order: 0,
   sample_input: "",
   sample_output: "",
+  image_url: "",
 };
 
 export default function NewProblemPage() {

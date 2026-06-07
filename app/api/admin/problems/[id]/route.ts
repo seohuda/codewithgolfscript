@@ -34,7 +34,7 @@ export async function GET(
   const { data: problem } = await admin
     .from("problems")
     .select(
-      "id, title, description, input_desc, output_desc, tier, source, step_group, step_order, sample_input, sample_output",
+      "id, title, description, input_desc, output_desc, tier, source, step_group, step_order, sample_input, sample_output, image_url",
     )
     .eq("id", id)
     .maybeSingle();
@@ -114,6 +114,7 @@ export async function PATCH(
       step_order: Number(body.step_order) || 0,
       sample_input: String(body.sample_input ?? ""),
       sample_output: String(body.sample_output ?? ""),
+      image_url: String(body.image_url ?? ""),
     })
     .eq("id", id);
 

@@ -27,6 +27,7 @@ interface ProblemInput {
   step_order?: number;
   sample_input?: string;
   sample_output?: string;
+  image_url?: string;
   solution?: string; // optional reference solution to validate cases
   cases?: CaseInput[];
 }
@@ -105,6 +106,7 @@ export async function POST(req: NextRequest) {
       step_order: Number(body.step_order) || 0,
       sample_input: body.sample_input ?? "",
       sample_output: body.sample_output ?? "",
+      image_url: body.image_url ?? "",
     })
     .select("id")
     .single();

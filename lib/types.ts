@@ -16,6 +16,7 @@ export interface Problem {
   source?: string;
   sample_input?: string;
   sample_output?: string;
+  image_url?: string;
   created_at: string;
 }
 

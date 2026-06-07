@@ -20,6 +20,7 @@ export interface ProblemDraft {
   step_order: number;
   sample_input: string;
   sample_output: string;
+  image_url: string;
 }
 
 interface Props {
@@ -45,9 +46,33 @@ export default function AdminProblemForm({
   const [solution, setSolution] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   function set<K extends keyof ProblemDraft>(k: K, v: ProblemDraft[K]) {
     setP((prev) => ({ ...prev, [k]: v }));
+  }
+
+  async function handleUpload(file: File) {
+    setError(null);
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/admin/upload", {
+        method: "POST",
+        body: fd,
+      });
+      const data = await res.json();
+      if (!res.ok || !data.url) {
+        setError(data.error ?? "이미지 업로드에 실패했습니다.");
+        return;
+      }
+      set("image_url", data.url);
+    } catch {
+      setError("이미지 업로드 중 오류가 발생했습니다.");
+    } finally {
+      setUploading(false);
+    }
   }
   function setCase(i: number, patch: Partial<TestCaseDraft>) {
     setCases((prev) => prev.map((c, idx) => (idx === i ? { ...c, ...patch } : c)));
@@ -195,6 +220,47 @@ export default function AdminProblemForm({
               className="field resize-y font-mono"
             />
           </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-ink">이미지 (선택)</label>
+          <div className="flex flex-wrap items-center gap-3">
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/gif,image/webp"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleUpload(f);
+              }}
+              className="text-sm text-ink-soft file:mr-3 file:border file:border-surface-border file:bg-surface-variant file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-ink"
+            />
+            {uploading && (
+              <span className="text-xs text-ink-faint">업로드 중…</span>
+            )}
+          </div>
+          <input
+            value={p.image_url}
+            onChange={(e) => set("image_url", e.target.value)}
+            placeholder="또는 이미지 URL 직접 입력"
+            className="field"
+          />
+          {p.image_url && (
+            <div className="border border-surface-border p-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={p.image_url}
+                alt="문제 이미지 미리보기"
+                className="max-h-48"
+              />
+              <button
+                type="button"
+                onClick={() => set("image_url", "")}
+                className="mt-2 text-xs text-danger hover:underline"
+              >
+                이미지 제거
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
