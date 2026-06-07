@@ -13,13 +13,13 @@ import { sendVerificationEmail, siteUrl } from "@/lib/email";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// Creates a verification token row and emails the link. Best-effort:
-// failures are logged but do not block account creation.
+// Creates a verification token row and emails the link.
+// Returns true on success, false if the email could not be sent.
 async function issueVerification(
   admin: ReturnType<typeof getSupabaseAdminClient>,
   userId: string,
   email: string,
-) {
+): Promise<boolean> {
   try {
     const { raw, hash } = generateToken();
     await admin.from("auth_tokens").insert({
@@ -30,8 +30,10 @@ async function issueVerification(
     });
     const link = `${siteUrl()}/verify-email?token=${raw}`;
     await sendVerificationEmail(email, link);
+    return true;
   } catch (e) {
     console.error("verification email failed:", e);
+    return false;
   }
 }
 
@@ -109,11 +111,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    await issueVerification(admin, existing.id as string, email);
-
+    const emailSent = await issueVerification(
+      admin,
+      existing.id as string,
+      email,
+    );
     return NextResponse.json({
       ok: true,
       verificationRequired: true,
+      emailSent,
       email,
     });
   }
@@ -143,11 +149,16 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  await issueVerification(admin, created.id as string, email);
+  const emailSent = await issueVerification(
+    admin,
+    created.id as string,
+    email,
+  );
 
   return NextResponse.json({
     ok: true,
     verificationRequired: true,
+    emailSent,
     email,
   });
 }

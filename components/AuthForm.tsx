@@ -21,10 +21,53 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [submitting, setSubmitting] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [showResend, setShowResend] = useState(false);
+  // Username availability (signup only).
+  const [checking, setChecking] = useState(false);
+  const [usernameStatus, setUsernameStatus] = useState<
+    "idle" | "ok" | "taken"
+  >("idle");
+  const [usernameMsg, setUsernameMsg] = useState<string | null>(null);
 
   const isSignup = mode === "signup";
   const title = isSignup ? "회원가입" : "로그인";
   const cta = isSignup ? "계정 만들기" : "로그인";
+
+  function onUsernameChange(v: string) {
+    setUsername(v);
+    // Any edit invalidates a previous availability check.
+    if (usernameStatus !== "idle") setUsernameStatus("idle");
+    if (usernameMsg) setUsernameMsg(null);
+  }
+
+  async function handleCheckUsername() {
+    setUsernameMsg(null);
+    const name = username.trim();
+    if (name.length < 3) {
+      setUsernameStatus("taken");
+      setUsernameMsg("아이디는 3자 이상이어야 합니다.");
+      return;
+    }
+    setChecking(true);
+    try {
+      const res = await fetch(
+        `/api/auth/check-username?username=${encodeURIComponent(name)}`,
+        { cache: "no-store" },
+      );
+      const d = (await res.json()) as { available: boolean; error?: string };
+      if (d.available) {
+        setUsernameStatus("ok");
+        setUsernameMsg("사용 가능한 아이디입니다.");
+      } else {
+        setUsernameStatus("taken");
+        setUsernameMsg(d.error ?? "사용할 수 없는 아이디입니다.");
+      }
+    } catch {
+      setUsernameStatus("idle");
+      setUsernameMsg("확인 중 오류가 발생했습니다.");
+    } finally {
+      setChecking(false);
+    }
+  }
 
   async function handleResend() {
     setError(null);
@@ -52,6 +95,10 @@ export default function AuthForm({ mode }: AuthFormProps) {
       setError("비밀번호가 일치하지 않습니다.");
       return;
     }
+    if (isSignup && usernameStatus !== "ok") {
+      setError("아이디 중복 확인을 먼저 해주세요.");
+      return;
+    }
     setSubmitting(true);
     try {
       const endpoint = isSignup ? "/api/auth/signup" : "/api/auth/login";
@@ -67,6 +114,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
         user?: AuthUser;
         error?: string;
         verificationRequired?: boolean;
+        emailSent?: boolean;
       };
 
       if (isSignup) {
@@ -75,13 +123,21 @@ export default function AuthForm({ mode }: AuthFormProps) {
           setError(data.error ?? "요청을 처리하지 못했습니다.");
           return;
         }
-        setNotice(
-          "가입이 거의 완료되었습니다! 보내드린 인증 메일의 링크를 눌러 이메일 인증을 마치면 로그인할 수 있습니다. (스팸함도 확인해 주세요)",
-        );
+        if (data.emailSent === false) {
+          setNotice(
+            "가입은 되었지만 인증 메일 발송에 실패했습니다. 잠시 후 로그인 화면에서 '인증 메일 다시 보내기'를 눌러 주세요.",
+          );
+        } else {
+          setNotice(
+            "가입이 거의 완료되었습니다! 보내드린 인증 메일의 링크를 눌러 이메일 인증을 마치면 로그인할 수 있습니다. (스팸함도 확인해 주세요)",
+          );
+        }
         setUsername("");
         setEmail("");
         setPassword("");
         setConfirm("");
+        setUsernameStatus("idle");
+        setUsernameMsg(null);
         return;
       }
 
@@ -116,15 +172,48 @@ export default function AuthForm({ mode }: AuthFormProps) {
           <label htmlFor="username" className="text-sm font-medium text-ink">
             아이디
           </label>
-          <input
-            id="username"
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            autoComplete="username"
-            placeholder="영문, 숫자, 밑줄(_) 3~20자"
-            className="field font-mono"
-          />
+          {isSignup ? (
+            <>
+              <div className="flex gap-2">
+                <input
+                  id="username"
+                  type="text"
+                  value={username}
+                  onChange={(e) => onUsernameChange(e.target.value)}
+                  autoComplete="username"
+                  placeholder="영문, 숫자, 밑줄(_) 3~20자"
+                  className="field font-mono flex-1"
+                />
+                <button
+                  type="button"
+                  onClick={handleCheckUsername}
+                  disabled={checking || username.trim().length < 3}
+                  className="btn-outlined whitespace-nowrap px-3 text-sm"
+                >
+                  {checking ? "확인 중…" : "중복 확인"}
+                </button>
+              </div>
+              {usernameMsg && (
+                <p
+                  className={`text-xs ${
+                    usernameStatus === "ok" ? "text-success" : "text-danger"
+                  }`}
+                >
+                  {usernameMsg}
+                </p>
+              )}
+            </>
+          ) : (
+            <input
+              id="username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              autoComplete="username"
+              placeholder="아이디"
+              className="field font-mono"
+            />
+          )}
         </div>
         {isSignup && (
           <div className="space-y-1.5">
