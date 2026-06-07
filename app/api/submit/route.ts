@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
   if (!code) {
     return badRequest("제출할 코드를 입력해 주세요.");
   }
-  if (code.length > 100000) {
+  if (code.length > 10000) {
     return badRequest("코드가 너무 깁니다.");
   }
 
@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
           passed: 0,
           total: 0,
           results: [],
-          message: `Database error (problem lookup): ${probErr.message}`,
+          message: "데이터베이스 오류가 발생했습니다.",
         },
         { status: 500 },
       );
@@ -138,7 +138,7 @@ export async function POST(req: NextRequest) {
         passed: 0,
         total: 0,
         results: [],
-        message: `Database error (test cases): ${casesErr.message}`,
+        message: "데이터베이스 오류가 발생했습니다.",
       },
       { status: 500 },
     );
@@ -219,7 +219,7 @@ export async function POST(req: NextRequest) {
         passed,
         total,
         results: executions,
-        message: `Database error (submission insert): ${subErr?.message ?? "unknown"}`,
+        message: "제출 저장에 실패했습니다.",
       },
       { status: 500 },
     );

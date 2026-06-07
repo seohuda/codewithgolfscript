@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
 
   if (selErr) {
     return NextResponse.json(
-      { error: `데이터베이스 오류: ${selErr.message}` },
+      { error: "데이터베이스 오류가 발생했습니다." },
       { status: 500 },
     );
   }
@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
 
     if (updErr) {
       return NextResponse.json(
-        { error: `계정 생성 실패: ${updErr.message}` },
+        { error: "계정 생성에 실패했습니다." },
         { status: 500 },
       );
     }
@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
       );
     }
     return NextResponse.json(
-      { error: `계정 생성 실패: ${insErr?.message ?? "알 수 없는 오류"}` },
+      { error: "계정 생성에 실패했습니다." },
       { status: 500 },
     );
   }

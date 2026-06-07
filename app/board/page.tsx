@@ -75,9 +75,6 @@ export default function BoardPage() {
       <div className="flex items-end justify-between">
         <div>
           <h1 className="text-2xl font-bold text-ink">게시판</h1>
-          <p className="mt-1 text-sm text-ink-soft">
-            풀이와 질문을 자유롭게 공유하세요.
-          </p>
         </div>
         {user ? (
           <Link href="/board/write" className="btn-filled">

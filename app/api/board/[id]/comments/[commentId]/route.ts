@@ -69,7 +69,7 @@ export async function PATCH(
     .update({ body: content })
     .eq("id", commentId);
   if (error) {
-    return NextResponse.json({ error: `수정 실패: ${error.message}` }, { status: 500 });
+    return NextResponse.json({ error: "수정에 실패했습니다." }, { status: 500 });
   }
   return NextResponse.json({ ok: true });
 }
@@ -101,7 +101,7 @@ export async function DELETE(
 
   const { error } = await admin.from("comments").delete().eq("id", commentId);
   if (error) {
-    return NextResponse.json({ error: `삭제 실패: ${error.message}` }, { status: 500 });
+    return NextResponse.json({ error: "삭제에 실패했습니다." }, { status: 500 });
   }
   return NextResponse.json({ ok: true });
 }

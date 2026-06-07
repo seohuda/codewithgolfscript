@@ -22,7 +22,11 @@ export async function GET(req: NextRequest) {
       .from("problems")
       .select("id, title, tier, source, step_group", { count: "exact" });
 
-    if (q) query = query.ilike("title", `%${q}%`);
+    if (q) {
+      // Escape PostgREST/LIKE wildcards so user input is treated literally.
+      const safe = q.replace(/[\\%_,()*]/g, "").slice(0, 100);
+      if (safe) query = query.ilike("title", `%${safe}%`);
+    }
     if (group) query = query.eq("step_group", group);
     if (tierMin !== null && tierMin !== "") {
       const t = Number(tierMin);
@@ -48,7 +52,7 @@ export async function GET(req: NextRequest) {
     const { data, error, count } = await query;
     if (error) {
       return NextResponse.json(
-        { error: error.message, problems: [], total: 0, pageSize: PAGE_SIZE },
+        { error: "문제를 불러오지 못했습니다.", problems: [], total: 0, pageSize: PAGE_SIZE },
         { status: 500 },
       );
     }

@@ -104,12 +104,6 @@ export default async function ProblemPage({
               </div>
             </div>
           )}
-
-          <div className="rounded-lg border border-surface-border bg-surface-dim p-4 text-xs leading-relaxed text-ink-faint">
-            제출 코드는 내장 GolfScript 인터프리터에서 실행됩니다. 표준 입력으로
-            읽고 표준 출력으로 씁니다. 출력은 양 끝 공백을 제거한 뒤 비교하며,
-            순위는 정확한 UTF-8 바이트 크기로 매겨집니다.
-          </div>
         </section>
 
         {/* Right: editor + leaderboard */}

@@ -43,9 +43,6 @@ export default function RankingPage() {
     <div className="animate-fade-in space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-ink">랭킹</h1>
-        <p className="mt-1 text-sm text-ink-soft">
-          푼 문제의 난이도에 따라 점수가 매겨집니다. 관리자는 제외됩니다.
-        </p>
       </div>
 
       {loading ? (

@@ -81,9 +81,6 @@ export default function MySubmissionsPage() {
     <div className="animate-fade-in space-y-5">
       <div>
         <h1 className="text-2xl font-bold text-ink">내 제출</h1>
-        <p className="mt-1 text-sm text-ink-soft">
-          내가 제출한 코드와 채점 결과입니다. 본인만 볼 수 있습니다.
-        </p>
       </div>
 
       {loading ? (

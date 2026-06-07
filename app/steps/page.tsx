@@ -49,9 +49,6 @@ export default async function StepsPage() {
     <div className="animate-fade-in space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-ink">단계별로 풀기</h1>
-        <p className="mt-1 text-sm text-ink-soft">
-          기초부터 차근차근. 위에서 아래로 순서대로 풀어 보세요.
-        </p>
       </div>
 
       {orderedGroups.length === 0 ? (

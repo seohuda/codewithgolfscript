@@ -164,9 +164,6 @@ export default function ProblemsPage() {
       <div className="flex items-end justify-between">
         <div>
           <h1 className="text-2xl font-bold text-ink">전체 문제</h1>
-          <p className="mt-1 text-sm text-ink-soft">
-            제목 검색, 티어·단계 필터로 원하는 문제를 찾으세요.
-          </p>
         </div>
         <Link href="/steps" className="btn-text">
           단계별로 풀기 →

@@ -33,9 +33,6 @@ export default function RootLayout({
             <header className="sticky top-0 z-40 border-b border-surface-border bg-surface/90 backdrop-blur-md">
               <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-4">
                 <Link href="/" className="flex items-center gap-2.5">
-                  <span className="flex h-8 w-8 items-center justify-center border border-surface-border bg-primary text-xs font-extrabold text-surface">
-                    gs
-                  </span>
                   <span className="text-base font-extrabold uppercase tracking-tight text-ink">
                     CODE WITH GOLF<span className="text-accent">SCRIPT</span>
                   </span>
@@ -80,13 +77,11 @@ export default function RootLayout({
             </main>
 
             <footer className="border-t border-surface-border bg-surface">
-              <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-8">
-                <span className="text-lg font-extrabold uppercase tracking-tight text-ink">
+              <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-6">
+                <span className="text-base font-extrabold uppercase tracking-tight text-ink">
                   CODE WITH GOLF<span className="text-accent">SCRIPT</span>
                 </span>
-                <span className="eyebrow">
-                  Ranked by exact UTF-8 byte count — fewer bytes, higher rank.
-                </span>
+                <span className="eyebrow">© 2026</span>
               </div>
             </footer>
           </AuthProvider>

@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
       .range(from, to);
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: "불러오지 못했습니다." }, { status: 500 });
     }
 
     const list = subs ?? [];

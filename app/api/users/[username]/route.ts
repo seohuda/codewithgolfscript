@@ -17,10 +17,21 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: { username: string } },
 ) {
-  const username = decodeURIComponent(params.username ?? "").trim();
-  if (!username) {
+  let username = "";
+  try {
+    username = decodeURIComponent(params.username ?? "").trim();
+  } catch {
+    return NextResponse.json({ error: "사용자를 찾을 수 없습니다." }, { status: 404 });
+  }
+  if (!username || username.length > 64) {
     return NextResponse.json({ error: "사용자명이 필요합니다." }, { status: 400 });
   }
+  // Usernames are restricted to [A-Za-z0-9_]; reject anything else so the
+  // ilike lookup can never receive % or other wildcard/meta characters.
+  if (!/^[A-Za-z0-9_]+$/.test(username)) {
+    return NextResponse.json({ error: "사용자를 찾을 수 없습니다." }, { status: 404 });
+  }
+  const safeName = username;
 
   try {
     const admin = getSupabaseAdminClient();
@@ -28,7 +39,7 @@ export async function GET(
     const { data: user, error: userErr } = await admin
       .from("users")
       .select("id, username, created_at, is_admin")
-      .ilike("username", username)
+      .ilike("username", safeName)
       .maybeSingle();
 
     if (userErr) {

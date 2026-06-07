@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
 
     const { data, error } = await query;
     if (error) {
-      return NextResponse.json({ error: error.message, posts: [] }, { status: 500 });
+      return NextResponse.json({ error: "게시글을 불러오지 못했습니다.", posts: [] }, { status: 500 });
     }
     return NextResponse.json({ posts: data ?? [] });
   } catch (e) {

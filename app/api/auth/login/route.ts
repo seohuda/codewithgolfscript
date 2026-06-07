@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
 
   if (error) {
     return NextResponse.json(
-      { error: `데이터베이스 오류: ${error.message}` },
+      { error: "데이터베이스 오류가 발생했습니다." },
       { status: 500 },
     );
   }
