@@ -78,6 +78,9 @@ export default function AdminPage() {
           <Link href="/admin/stats" className="btn-outlined">
             통계
           </Link>
+          <Link href="/admin/users" className="btn-outlined">
+            유저 관리
+          </Link>
           <Link href="/admin/steps" className="btn-outlined">
             단계 관리
           </Link>

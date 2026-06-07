@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
 import { requireAdmin } from "@/lib/adminAuth";
+import { logAdminAction } from "@/lib/audit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -82,6 +83,13 @@ export async function POST(req: NextRequest) {
     if (r) {
       const table = r.target_type === "post" ? "posts" : "comments";
       await admin.from(table).delete().eq("id", r.target_id);
+      await logAdminAction({
+        adminId,
+        action: "delete_report_target",
+        targetType: r.target_type as string,
+        targetId: r.target_id as number,
+        detail: `신고 #${id} 처리: ${r.target_type} #${r.target_id} 삭제`,
+      });
     }
     await admin.from("reports").update({ status: "resolved" }).eq("id", id);
     return NextResponse.json({ ok: true });
