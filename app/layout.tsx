@@ -30,13 +30,13 @@ export default function RootLayout({
       <body className="min-h-screen bg-surface-dim font-sans text-ink antialiased">
         <ThemeProvider>
           <AuthProvider>
-            <header className="sticky top-0 z-40 border-b border-surface-border bg-surface">
-              <div className="mx-auto flex h-14 max-w-6xl items-center gap-6 px-4">
-                <Link href="/" className="flex items-center gap-2">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-xs font-bold text-white">
+            <header className="sticky top-0 z-40 border-b border-surface-border bg-surface/80 backdrop-blur-xl">
+              <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-4">
+                <Link href="/" className="flex items-center gap-2.5">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-extrabold text-black">
                     gs
                   </span>
-                  <span className="text-base font-bold tracking-tight text-ink">
+                  <span className="text-base font-extrabold tracking-tight text-ink">
                     CODE WITH GOLF<span className="text-primary">SCRIPT</span>
                   </span>
                 </Link>
@@ -44,25 +44,25 @@ export default function RootLayout({
                 <nav className="hidden items-center gap-1 text-sm md:flex">
                   <Link
                     href="/problems"
-                    className="rounded-md px-3 py-1.5 font-medium text-ink-soft transition-colors hover:bg-surface-variant hover:text-ink"
+                    className="rounded-full px-3 py-1.5 font-bold text-ink-soft transition-colors hover:text-ink"
                   >
                     전체 문제
                   </Link>
                   <Link
                     href="/steps"
-                    className="rounded-md px-3 py-1.5 font-medium text-ink-soft transition-colors hover:bg-surface-variant hover:text-ink"
+                    className="rounded-full px-3 py-1.5 font-bold text-ink-soft transition-colors hover:text-ink"
                   >
                     단계별로 풀기
                   </Link>
                   <Link
                     href="/board"
-                    className="rounded-md px-3 py-1.5 font-medium text-ink-soft transition-colors hover:bg-surface-variant hover:text-ink"
+                    className="rounded-full px-3 py-1.5 font-bold text-ink-soft transition-colors hover:text-ink"
                   >
                     게시판
                   </Link>
                   <Link
                     href="/ranking"
-                    className="rounded-md px-3 py-1.5 font-medium text-ink-soft transition-colors hover:bg-surface-variant hover:text-ink"
+                    className="rounded-full px-3 py-1.5 font-bold text-ink-soft transition-colors hover:text-ink"
                   >
                     랭킹
                   </Link>

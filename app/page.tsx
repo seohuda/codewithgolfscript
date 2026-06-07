@@ -54,22 +54,45 @@ export default async function HomePage() {
 
   return (
     <div className="animate-fade-in space-y-8">
-      {/* Compact intro strip */}
-      <section className="flex flex-col gap-4 rounded-xl border border-surface-border bg-surface p-6 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-ink">
-            바이트로 겨루는 GolfScript 채점소
-          </h1>
-          <p className="mt-1 text-sm text-ink-soft">
-            정답보다 짧은 코드. 현재 {problemCount}개의 문제가 티어별로 준비돼
-            있습니다.
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Link href="/steps" className="btn-filled whitespace-nowrap">
+      {/* Spotify-style gradient hero */}
+      <section className="relative overflow-hidden rounded-2xl p-8 sm:p-10">
+        <div
+          className="absolute inset-0 -z-10"
+          style={{
+            background:
+              "linear-gradient(135deg, rgb(var(--primary)) 0%, rgb(var(--primary-dark)) 45%, rgb(var(--surface)) 120%)",
+          }}
+        />
+        <div
+          className="absolute inset-0 -z-10 opacity-60"
+          style={{
+            background:
+              "radial-gradient(120% 120% at 100% 0%, rgb(var(--surface) / 0.0) 40%, rgb(var(--surface) / 0.85) 100%)",
+          }}
+        />
+        <p className="text-sm font-bold uppercase tracking-widest text-black/70">
+          GolfScript Online Judge
+        </p>
+        <h1 className="mt-2 max-w-2xl text-4xl font-extrabold leading-tight tracking-tight text-black sm:text-5xl">
+          더 짧게.
+          <br />
+          바이트로 겨루는 코드.
+        </h1>
+        <p className="mt-4 max-w-xl text-base font-medium text-black/80">
+          정답이 아니라 코드 길이로 순위가 갈리는 곳. 지금 {problemCount}개의
+          문제가 티어별로 준비돼 있습니다.
+        </p>
+        <div className="mt-7 flex flex-wrap gap-3">
+          <Link
+            href="/steps"
+            className="rounded-full bg-black px-7 py-3 text-sm font-bold text-white transition-transform hover:scale-105"
+          >
             단계별로 풀기
           </Link>
-          <Link href="/problems" className="btn-outlined whitespace-nowrap">
+          <Link
+            href="/problems"
+            className="rounded-full border border-black/30 px-7 py-3 text-sm font-bold text-black transition-all hover:border-black hover:scale-105"
+          >
             전체 문제
           </Link>
         </div>
