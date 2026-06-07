@@ -53,64 +53,69 @@ export default async function HomePage() {
   const { problems, posts, problemCount } = await getData();
 
   return (
-    <div className="animate-fade-in space-y-8">
-      {/* Spotify-style gradient hero */}
-      <section className="relative overflow-hidden rounded-2xl p-8 sm:p-10">
-        <div
-          className="absolute inset-0 -z-10"
-          style={{
-            background:
-              "linear-gradient(135deg, rgb(var(--primary)) 0%, rgb(var(--primary-dark)) 45%, rgb(var(--surface)) 120%)",
-          }}
-        />
-        <div
-          className="absolute inset-0 -z-10 opacity-60"
-          style={{
-            background:
-              "radial-gradient(120% 120% at 100% 0%, rgb(var(--surface) / 0.0) 40%, rgb(var(--surface) / 0.85) 100%)",
-          }}
-        />
-        <p className="text-sm font-bold uppercase tracking-widest text-black/70">
-          GolfScript Online Judge
-        </p>
-        <h1 className="mt-2 max-w-2xl text-4xl font-extrabold leading-tight tracking-tight text-black sm:text-5xl">
-          더 짧게.
-          <br />
-          바이트로 겨루는 코드.
-        </h1>
-        <p className="mt-4 max-w-xl text-base font-medium text-black/80">
-          정답이 아니라 코드 길이로 순위가 갈리는 곳. 지금 {problemCount}개의
-          문제가 티어별로 준비돼 있습니다.
-        </p>
-        <div className="mt-7 flex flex-wrap gap-3">
-          <Link
-            href="/steps"
-            className="rounded-full bg-black px-7 py-3 text-sm font-bold text-white transition-transform hover:scale-105"
-          >
-            단계별로 풀기
-          </Link>
-          <Link
-            href="/problems"
-            className="rounded-full border border-black/30 px-7 py-3 text-sm font-bold text-black transition-all hover:border-black hover:scale-105"
-          >
-            전체 문제
-          </Link>
+    <div className="animate-fade-in space-y-10">
+      {/* Editorial hero */}
+      <section className="border border-surface-border bg-surface">
+        <div className="flex items-center justify-between border-b border-surface-border px-5 py-2">
+          <span className="eyebrow">GolfScript Online Judge</span>
+          <span className="eyebrow hidden sm:inline">EST. 2026 / KR</span>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3">
+          <div className="border-b border-surface-border p-6 md:col-span-2 md:border-b-0 md:border-r md:p-10">
+            <h1 className="text-5xl font-extrabold uppercase leading-[0.95] tracking-tight text-ink sm:text-6xl md:text-7xl">
+              더 짧게.
+              <br />
+              <span className="text-accent">바이트</span>로
+              <br />
+              겨룬다.
+            </h1>
+            <p className="mt-6 max-w-md text-sm leading-relaxed text-ink-soft">
+              정답 여부가 아니라 코드의 바이트 수로 순위가 갈리는 GolfScript
+              전용 채점소. 한 글자라도 더 줄이세요.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link href="/steps" className="btn-filled">
+                단계별로 시작 →
+              </Link>
+              <Link href="/problems" className="btn-outlined">
+                전체 문제
+              </Link>
+            </div>
+          </div>
+          <div className="flex flex-col">
+            <div className="flex flex-1 flex-col justify-center gap-1 border-b border-surface-border p-6">
+              <span className="eyebrow">등록된 문제</span>
+              <span className="font-mono text-4xl font-bold tabular-nums text-ink">
+                {String(problemCount).padStart(3, "0")}
+              </span>
+            </div>
+            <div className="flex flex-1 flex-col justify-center gap-1 bg-accent p-6 text-white">
+              <span className="font-mono text-[11px] font-medium uppercase tracking-widest text-white/80">
+                채점 방식
+              </span>
+              <span className="font-mono text-lg font-bold leading-tight">
+                UTF-8
+                <br />
+                BYTE COUNT
+              </span>
+            </div>
+          </div>
         </div>
       </section>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         {/* Recent problems */}
         <section className="lg:col-span-2">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-bold text-ink">최근 추가된 문제</h2>
-            <Link
-              href="/problems"
-              className="text-xs font-medium text-primary hover:underline"
-            >
+          <div className="mb-0 flex items-center justify-between border-b-2 border-ink pb-2">
+            <h2 className="flex items-center gap-2 text-sm font-extrabold uppercase tracking-wide text-ink">
+              <span className="inline-block h-3 w-3 bg-accent" />
+              최근 추가된 문제
+            </h2>
+            <Link href="/problems" className="eyebrow hover:text-accent">
               전체 보기 →
             </Link>
           </div>
-          <div className="card overflow-hidden">
+          <div className="border border-t-0 border-surface-border bg-surface">
             {problems.length === 0 ? (
               <div className="p-8 text-center text-sm text-ink-faint">
                 문제가 아직 없습니다.
@@ -121,7 +126,7 @@ export default async function HomePage() {
                   {problems.map((p) => (
                     <tr
                       key={p.id}
-                      className="border-b border-surface-border last:border-0 hover:bg-surface-dim"
+                      className="border-b border-surface-border last:border-0 hover:bg-surface-variant"
                     >
                       <td className="w-12 px-4 py-3">
                         <TierBadge tier={p.tier ?? 0} size="sm" />
@@ -129,12 +134,12 @@ export default async function HomePage() {
                       <td className="px-2 py-3">
                         <Link
                           href={`/problems/${p.id}`}
-                          className="font-medium text-ink hover:text-primary hover:underline"
+                          className="font-medium text-ink hover:text-accent"
                         >
                           {p.title}
                         </Link>
                       </td>
-                      <td className="hidden px-4 py-3 text-right text-xs text-ink-faint sm:table-cell">
+                      <td className="hidden px-4 py-3 text-right font-mono text-[11px] text-ink-faint sm:table-cell">
                         {p.source && !p.source.startsWith("자체 제작")
                           ? p.source
                           : ""}
@@ -149,16 +154,16 @@ export default async function HomePage() {
 
         {/* Recent board */}
         <section>
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-bold text-ink">게시판</h2>
-            <Link
-              href="/board"
-              className="text-xs font-medium text-primary hover:underline"
-            >
+          <div className="mb-0 flex items-center justify-between border-b-2 border-ink pb-2">
+            <h2 className="flex items-center gap-2 text-sm font-extrabold uppercase tracking-wide text-ink">
+              <span className="inline-block h-3 w-3 bg-accent" />
+              게시판
+            </h2>
+            <Link href="/board" className="eyebrow hover:text-accent">
               전체 보기 →
             </Link>
           </div>
-          <div className="card overflow-hidden">
+          <div className="border border-t-0 border-surface-border bg-surface">
             {posts.length === 0 ? (
               <div className="p-8 text-center text-sm text-ink-faint">
                 아직 글이 없습니다.
@@ -169,17 +174,17 @@ export default async function HomePage() {
                   <li key={post.id}>
                     <Link
                       href={`/board/${post.id}`}
-                      className="block px-4 py-3 hover:bg-surface-dim"
+                      className="block px-4 py-3 hover:bg-surface-variant"
                     >
                       <p className="truncate text-sm font-medium text-ink">
                         {post.title}
                         {post.comment_count > 0 && (
-                          <span className="ml-1.5 text-xs text-primary">
+                          <span className="ml-1.5 font-mono text-xs text-accent">
                             [{post.comment_count}]
                           </span>
                         )}
                       </p>
-                      <p className="mt-0.5 text-xs text-ink-faint">
+                      <p className="mt-0.5 font-mono text-[11px] text-ink-faint">
                         {post.author} · {timeAgo(post.created_at)}
                       </p>
                     </Link>

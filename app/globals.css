@@ -4,40 +4,44 @@
 
 :root {
   color-scheme: light;
-  /* Spotify-flavored light: green accent on warm-white surfaces */
-  --primary: 29 185 84;
-  --primary-dark: 21 145 65;
-  --primary-light: 30 215 96;
-  --primary-container: 209 245 222;
-  --surface: 255 255 255;
-  --surface-dim: 245 245 247;
-  --surface-variant: 236 237 240;
-  --surface-border: 222 224 229;
-  --ink: 25 28 32;
-  --ink-soft: 95 100 110;
-  --ink-faint: 138 144 154;
-  --success: 29 159 75;
-  --danger: 226 33 52;
-  --warning: 222 134 12;
+  /* Editorial paper-white with a single vermilion accent */
+  --primary: 18 18 18;
+  --primary-dark: 0 0 0;
+  --primary-light: 56 56 56;
+  --primary-container: 235 235 232;
+  --surface: 247 246 242;
+  --surface-dim: 240 239 234;
+  --surface-variant: 232 231 225;
+  --surface-border: 22 22 22;
+  --ink: 18 18 18;
+  --ink-soft: 74 74 70;
+  --ink-faint: 122 120 112;
+  --success: 23 122 71;
+  --danger: 200 30 30;
+  --warning: 176 110 8;
+  --accent: 255 59 20;
+  --accent-soft: 255 224 216;
 }
 
 .dark {
   color-scheme: dark;
-  /* Spotify signature: near-black stack + vivid green */
-  --primary: 30 215 96;
-  --primary-dark: 29 185 84;
-  --primary-light: 73 224 130;
-  --primary-container: 24 56 38;
-  --surface: 24 24 24;
-  --surface-dim: 18 18 18;
-  --surface-variant: 40 40 40;
-  --surface-border: 54 54 54;
-  --ink: 255 255 255;
-  --ink-soft: 179 179 179;
-  --ink-faint: 122 122 122;
-  --success: 30 215 96;
-  --danger: 244 96 109;
-  --warning: 255 184 76;
+  /* True-black terminal with the same vermilion accent */
+  --primary: 240 240 240;
+  --primary-dark: 255 255 255;
+  --primary-light: 200 200 200;
+  --primary-container: 30 30 30;
+  --surface: 10 10 10;
+  --surface-dim: 0 0 0;
+  --surface-variant: 24 24 24;
+  --surface-border: 58 58 58;
+  --ink: 240 240 240;
+  --ink-soft: 158 158 154;
+  --ink-faint: 110 110 106;
+  --success: 56 200 118;
+  --danger: 255 95 86;
+  --warning: 240 176 64;
+  --accent: 255 78 42;
+  --accent-soft: 48 22 16;
 }
 
 html,
@@ -55,8 +59,8 @@ body {
 }
 
 ::selection {
-  background: rgb(var(--primary) / 0.22);
-  color: rgb(var(--ink));
+  background: rgb(var(--accent));
+  color: #fff;
 }
 
 ::-webkit-scrollbar {
@@ -65,51 +69,62 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgb(var(--surface-variant));
+  background: rgb(var(--surface-dim));
+  border-left: 1px solid rgb(var(--surface-border));
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgb(var(--surface-border));
-  border-radius: 9999px;
-  border: 3px solid rgb(var(--surface-variant));
-  background-clip: padding-box;
+  background: rgb(var(--ink-faint));
+  border: 3px solid rgb(var(--surface-dim));
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgb(var(--ink-faint));
-  background-clip: padding-box;
+  background: rgb(var(--ink-soft));
 }
 
 @layer components {
-  /* Rounded surface card */
+  /* Flat editorial card — sharp corners, hairline rule */
   .card {
-    @apply rounded-2xl border border-surface-border bg-surface shadow-e1;
+    @apply border border-surface-border bg-surface;
   }
 
-  /* Filled (primary) pill button — Spotify-style green with dark label,
-     subtle scale on hover */
+  /* Primary action — solid ink block, accent on hover */
   .btn-filled {
-    @apply inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-bold text-black transition-all hover:bg-primary-light hover:scale-[1.03] active:scale-100 disabled:cursor-not-allowed disabled:bg-ink-faint disabled:text-surface disabled:hover:scale-100;
+    @apply inline-flex items-center justify-center gap-2 border border-surface-border bg-primary px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-surface transition-colors hover:bg-accent hover:text-white hover:border-accent disabled:cursor-not-allowed disabled:bg-ink-faint disabled:hover:bg-ink-faint disabled:hover:text-surface;
   }
 
-  /* Outlined pill button */
+  /* Secondary — bordered, fills with ink on hover */
   .btn-outlined {
-    @apply inline-flex items-center justify-center gap-2 rounded-full border border-surface-border bg-transparent px-6 py-2.5 text-sm font-bold text-ink transition-all hover:border-ink hover:scale-[1.03] active:scale-100 disabled:cursor-not-allowed disabled:text-ink-faint;
+    @apply inline-flex items-center justify-center gap-2 border border-surface-border bg-transparent px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-ink transition-colors hover:bg-primary hover:text-surface disabled:cursor-not-allowed disabled:text-ink-faint;
   }
 
-  /* Text button */
+  /* Text/link button */
   .btn-text {
-    @apply inline-flex items-center justify-center gap-1.5 rounded-full px-3 py-2 text-sm font-bold text-ink-soft transition-colors hover:text-ink;
+    @apply inline-flex items-center justify-center gap-1.5 px-2.5 py-2 text-sm font-semibold text-ink-soft transition-colors hover:text-accent;
   }
 
-  /* Text field */
+  /* Text field — square, underline-accent focus */
   .field {
-    @apply w-full rounded-lg border border-surface-border bg-surface-variant px-3.5 py-2.5 text-sm text-ink outline-none transition-colors placeholder:text-ink-faint focus:border-primary focus:bg-surface focus:ring-2 focus:ring-primary/30;
+    @apply w-full border border-surface-border bg-surface px-3.5 py-2.5 text-sm text-ink outline-none transition-colors placeholder:text-ink-faint focus:border-accent;
   }
 
   .chip {
-    @apply inline-flex items-center gap-1 rounded-full border border-surface-border bg-surface-variant px-2.5 py-0.5 text-xs font-medium text-ink-soft;
+    @apply inline-flex items-center gap-1 border border-surface-border bg-surface px-2 py-0.5 font-mono text-[11px] font-medium uppercase tracking-wide text-ink-soft;
   }
+
+  /* Uppercase mono section label */
+  .eyebrow {
+    @apply font-mono text-[11px] font-medium uppercase tracking-widest text-ink-faint;
+  }
+}
+
+/* Subtle dotted grid backdrop for the page body */
+.grid-bg {
+  background-image: radial-gradient(
+    rgb(var(--surface-border) / 0.5) 1px,
+    transparent 1px
+  );
+  background-size: 22px 22px;
 }
 
 /* Code editor textarea */

@@ -30,39 +30,59 @@ export default function RootLayout({
       <body className="min-h-screen bg-surface-dim font-sans text-ink antialiased">
         <ThemeProvider>
           <AuthProvider>
-            <header className="sticky top-0 z-40 border-b border-surface-border bg-surface/80 backdrop-blur-xl">
+            {/* Accent ticker */}
+            <div className="overflow-hidden border-b border-surface-border bg-accent text-white">
+              <div className="flex whitespace-nowrap py-1 font-mono text-[11px] uppercase tracking-widest">
+                <div className="flex shrink-0 animate-marquee gap-8 pr-8">
+                  {Array.from({ length: 2 }).map((_, i) => (
+                    <span key={i} className="flex gap-8">
+                      <span>SHORTER IS BETTER</span>
+                      <span>·</span>
+                      <span>BYTES NOT LINES</span>
+                      <span>·</span>
+                      <span>GOLFSCRIPT ONLY</span>
+                      <span>·</span>
+                      <span>CODE WITH GOLFSCRIPT</span>
+                      <span>·</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <header className="sticky top-0 z-40 border-b border-surface-border bg-surface/90 backdrop-blur-md">
               <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-4">
                 <Link href="/" className="flex items-center gap-2.5">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-extrabold text-black">
+                  <span className="flex h-8 w-8 items-center justify-center border border-surface-border bg-primary text-xs font-extrabold text-surface">
                     gs
                   </span>
-                  <span className="text-base font-extrabold tracking-tight text-ink">
-                    CODE WITH GOLF<span className="text-primary">SCRIPT</span>
+                  <span className="text-base font-extrabold uppercase tracking-tight text-ink">
+                    CODE/GOLF<span className="text-accent">SCRIPT</span>
                   </span>
                 </Link>
 
-                <nav className="hidden items-center gap-1 text-sm md:flex">
+                <nav className="hidden items-center gap-1 md:flex">
                   <Link
                     href="/problems"
-                    className="rounded-full px-3 py-1.5 font-bold text-ink-soft transition-colors hover:text-ink"
+                    className="px-3 py-1.5 font-mono text-xs font-medium uppercase tracking-wide text-ink-soft transition-colors hover:text-accent"
                   >
                     전체 문제
                   </Link>
                   <Link
                     href="/steps"
-                    className="rounded-full px-3 py-1.5 font-bold text-ink-soft transition-colors hover:text-ink"
+                    className="px-3 py-1.5 font-mono text-xs font-medium uppercase tracking-wide text-ink-soft transition-colors hover:text-accent"
                   >
-                    단계별로 풀기
+                    단계별
                   </Link>
                   <Link
                     href="/board"
-                    className="rounded-full px-3 py-1.5 font-bold text-ink-soft transition-colors hover:text-ink"
+                    className="px-3 py-1.5 font-mono text-xs font-medium uppercase tracking-wide text-ink-soft transition-colors hover:text-accent"
                   >
                     게시판
                   </Link>
                   <Link
                     href="/ranking"
-                    className="rounded-full px-3 py-1.5 font-bold text-ink-soft transition-colors hover:text-ink"
+                    className="px-3 py-1.5 font-mono text-xs font-medium uppercase tracking-wide text-ink-soft transition-colors hover:text-accent"
                   >
                     랭킹
                   </Link>
@@ -75,16 +95,15 @@ export default function RootLayout({
               </div>
             </header>
 
-            <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+            <main className="mx-auto max-w-6xl px-4 py-10">{children}</main>
 
             <footer className="mt-16 border-t border-surface-border bg-surface">
-              <div className="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-6 text-xs text-ink-faint">
-                <span className="font-semibold text-ink-soft">
-                  CODE WITH GOLFSCRIPT
+              <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-8">
+                <span className="text-lg font-extrabold uppercase tracking-tight text-ink">
+                  CODE/GOLF<span className="text-accent">SCRIPT</span>
                 </span>
-                <span>
-                  정확한 UTF-8 바이트 수로 순위가 매겨집니다. 더 짧을수록 더 높은
-                  순위.
+                <span className="eyebrow">
+                  Ranked by exact UTF-8 byte count — fewer bytes, higher rank.
                 </span>
               </div>
             </footer>
