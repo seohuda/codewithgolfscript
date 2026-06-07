@@ -78,6 +78,9 @@ export default function AdminPage() {
           <Link href="/admin/steps" className="btn-outlined">
             단계 관리
           </Link>
+          <Link href="/admin/reports" className="btn-outlined">
+            신고 관리
+          </Link>
           <Link href="/admin/problems/new" className="btn-filled">
             새 문제
           </Link>

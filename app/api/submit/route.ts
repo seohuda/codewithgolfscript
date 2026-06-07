@@ -92,6 +92,60 @@ export async function POST(req: NextRequest) {
 
   const admin = getSupabaseAdminClient();
 
+  // --- Rate limiting: block abusive rapid submissions -----------------
+  {
+    // Existing ban still active?
+    const { data: u } = await admin
+      .from("users")
+      .select("banned_until")
+      .eq("id", session.userId)
+      .maybeSingle();
+    if (u?.banned_until && new Date(u.banned_until) > new Date()) {
+      const mins = Math.ceil(
+        (new Date(u.banned_until).getTime() - Date.now()) / 60000,
+      );
+      return NextResponse.json<SubmitResponse>(
+        {
+          submissionId: null,
+          verdict: "RE",
+          bytes: 0,
+          passed: 0,
+          total: 0,
+          results: [],
+          message: `너무 빠른 제출로 일시 정지되었습니다. ${mins}분 후 다시 시도해 주세요.`,
+        },
+        { status: 429 },
+      );
+    }
+
+    // More than 10 submissions in the last 20 seconds → 5-minute ban.
+    const since = new Date(Date.now() - 20_000).toISOString();
+    const { count } = await admin
+      .from("submissions")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", session.userId)
+      .gte("created_at", since);
+    if ((count ?? 0) >= 10) {
+      const until = new Date(Date.now() + 5 * 60_000).toISOString();
+      await admin
+        .from("users")
+        .update({ banned_until: until })
+        .eq("id", session.userId);
+      return NextResponse.json<SubmitResponse>(
+        {
+          submissionId: null,
+          verdict: "RE",
+          bytes: 0,
+          passed: 0,
+          total: 0,
+          results: [],
+          message: "제출이 너무 잦습니다. 5분간 제출이 제한됩니다.",
+        },
+        { status: 429 },
+      );
+    }
+  }
+
   // --- User comes from the verified session ---------------------------
   const userId: string = session.userId;
 

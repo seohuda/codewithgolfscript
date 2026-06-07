@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
+import ReportButton from "@/components/ReportButton";
 
 interface Post {
   id: number;
@@ -212,6 +213,11 @@ export default function PostDetailPage() {
               </button>
             </div>
           )}
+          {!canModify && user && (
+            <div className="flex shrink-0">
+              <ReportButton targetType="post" targetId={post.id} />
+            </div>
+          )}
         </div>
         <div className="mt-2 flex items-center gap-3 text-xs text-ink-faint">
           <span
@@ -272,6 +278,9 @@ export default function PostDetailPage() {
                           삭제
                         </button>
                       </div>
+                    )}
+                    {!mine && user && !editing && (
+                      <ReportButton targetType="comment" targetId={c.id} />
                     )}
                   </div>
                   {editing ? (

@@ -5,6 +5,7 @@ import { Problem } from "@/lib/types";
 import ProblemWorkspace from "@/components/ProblemWorkspace";
 import TierBadge from "@/components/TierBadge";
 import ProblemStatusBadge from "@/components/ProblemStatusBadge";
+import DifficultyVote from "@/components/DifficultyVote";
 
 export const dynamic = "force-dynamic";
 
@@ -112,6 +113,8 @@ export default async function ProblemPage({
               </div>
             </div>
           )}
+
+          <DifficultyVote problemId={problem.id} />
         </section>
 
         {/* Right: editor + leaderboard */}
