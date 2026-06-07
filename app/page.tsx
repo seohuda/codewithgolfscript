@@ -70,8 +70,8 @@ export default async function HomePage() {
               겨룬다.
             </h1>
             <p className="mt-6 max-w-md text-sm leading-relaxed text-ink-soft">
-              정답 여부가 아니라 코드의 바이트 수로 순위가 갈리는 GolfScript
-              전용 채점소. 한 글자라도 더 줄이세요.
+              정답은 기본, 진짜 승부는 코드 길이. 같은 문제를 맞혔다면 더
+              짧은 바이트가 위로 올라가는 GolfScript 전용 채점소입니다.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href="/steps" className="btn-filled">
