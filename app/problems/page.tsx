@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import TierBadge from "@/components/TierBadge";
 import { useAuth } from "@/components/AuthProvider";
-import { STEP_GROUPS } from "@/scripts/problems.steps";
 
 interface Row {
   id: number;
@@ -75,6 +74,23 @@ export default function ProblemsPage() {
 
   const [solved, setSolved] = useState<Set<number>>(new Set());
   const [tried, setTried] = useState<Set<number>>(new Set());
+  const [stepGroups, setStepGroups] = useState<{ id: number; name: string }[]>(
+    [],
+  );
+
+  // Load step groups for the filter dropdown.
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/step-groups", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d) => {
+        if (!cancelled) setStepGroups(d.groups ?? []);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Load the user's solve status once (and when login changes).
   useEffect(() => {
@@ -209,8 +225,8 @@ export default function ProblemsPage() {
               className="field w-auto"
             >
               <option value="">전체 단계</option>
-              {STEP_GROUPS.map((g) => (
-                <option key={g.name} value={g.name}>
+              {stepGroups.map((g) => (
+                <option key={g.id} value={g.name}>
                   {g.name}
                 </option>
               ))}

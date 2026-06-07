@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { listTiers } from "@/lib/tiers";
 
 export interface TestCaseDraft {
   stdin: string;
@@ -47,6 +48,22 @@ export default function AdminProblemForm({
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [groups, setGroups] = useState<{ id: number; name: string }[]>([]);
+
+  const tiers = listTiers();
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/step-groups", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d) => {
+        if (!cancelled) setGroups(d.groups ?? []);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   function set<K extends keyof ProblemDraft>(k: K, v: ProblemDraft[K]) {
     setP((prev) => ({ ...prev, [k]: v }));
@@ -132,15 +149,18 @@ export default function AdminProblemForm({
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-ink">티어 (0~30)</label>
-            <input
-              type="number"
-              min={0}
-              max={30}
+            <label className="text-sm font-medium text-ink">티어</label>
+            <select
               value={p.tier}
               onChange={(e) => set("tier", Number(e.target.value))}
               className="field"
-            />
+            >
+              {tiers.map((t) => (
+                <option key={t.value} value={t.value}>
+                  {t.label}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-ink">단계 순서</label>
@@ -155,12 +175,18 @@ export default function AdminProblemForm({
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-ink">단계 그룹</label>
-            <input
+            <select
               value={p.step_group}
               onChange={(e) => set("step_group", e.target.value)}
-              placeholder="예: 입출력과 기본 연산"
               className="field"
-            />
+            >
+              <option value="">선택 안 함</option>
+              {groups.map((g) => (
+                <option key={g.id} value={g.name}>
+                  {g.name}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-ink">출처</label>

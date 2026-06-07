@@ -76,3 +76,14 @@ export function tierShort(tier: number): string {
   if (info.tier === 0) return "?";
   return `${info.group[0]}${6 - info.level}`;
 }
+
+/** All selectable tiers (0..30) with Korean labels — for dropdowns. */
+export function listTiers(): { value: number; label: string }[] {
+  const out: { value: number; label: string }[] = [];
+  for (let t = 0; t <= 30; t++) {
+    const info = getTierInfo(t);
+    out.push({ value: t, label: t === 0 ? "언레이티드" : info.nameKo });
+  }
+  return out;
+}
+

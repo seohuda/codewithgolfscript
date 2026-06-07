@@ -1,6 +1,5 @@
 import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
 import StepProblemList from "@/components/StepProblemList";
-import { STEP_GROUPS } from "@/scripts/problems.steps";
 
 export const dynamic = "force-dynamic";
 
@@ -12,25 +11,39 @@ interface Row {
   step_order: number;
 }
 
-async function fetchProblems(): Promise<Row[]> {
+interface Group {
+  name: string;
+  description: string;
+}
+
+async function fetchData(): Promise<{ problems: Row[]; groups: Group[] }> {
   try {
     const admin = getSupabaseAdminClient();
-    const { data, error } = await admin
-      .from("problems")
-      .select("id, title, tier, step_group, step_order")
-      .order("step_order", { ascending: true })
-      .range(0, 999);
-    if (error || !data) return [];
-    return data as Row[];
+    const [probRes, groupRes] = await Promise.all([
+      admin
+        .from("problems")
+        .select("id, title, tier, step_group, step_order")
+        .order("step_order", { ascending: true })
+        .range(0, 999),
+      admin
+        .from("step_groups")
+        .select("name, description, sort_order")
+        .order("sort_order", { ascending: true })
+        .order("id", { ascending: true }),
+    ]);
+    return {
+      problems: (probRes.data ?? []) as Row[],
+      groups: (groupRes.data ?? []) as Group[],
+    };
   } catch {
-    return [];
+    return { problems: [], groups: [] };
   }
 }
 
 export default async function StepsPage() {
-  const problems = await fetchProblems();
+  const { problems, groups } = await fetchData();
 
-  // Group by step_group, preserving the order defined in STEP_GROUPS.
+  // Group problems by step_group.
   const byGroup = new Map<string, Row[]>();
   for (const p of problems) {
     const g = p.step_group || "기타";
@@ -41,9 +54,11 @@ export default async function StepsPage() {
     list.sort((a, b) => a.step_order - b.step_order);
   }
 
-  const orderedGroups = STEP_GROUPS.map((g) => g.name).filter((n) =>
-    byGroup.has(n),
-  );
+  // Order by the managed step_groups table; only groups that have problems.
+  const descOf = new Map(groups.map((g) => [g.name, g.description]));
+  const orderedGroups = groups
+    .map((g) => g.name)
+    .filter((n) => byGroup.has(n));
 
   return (
     <div className="animate-fade-in space-y-6">
@@ -53,14 +68,13 @@ export default async function StepsPage() {
 
       {orderedGroups.length === 0 ? (
         <div className="card p-10 text-center text-sm text-ink-faint">
-          아직 단계 정보가 없습니다. 마이그레이션과 시드를 실행했는지
-          확인하세요.
+          아직 단계 정보가 없습니다.
         </div>
       ) : (
         <div className="space-y-5">
           {orderedGroups.map((groupName, gi) => {
-            const meta = STEP_GROUPS.find((g) => g.name === groupName);
             const list = byGroup.get(groupName)!;
+            const desc = descOf.get(groupName);
             return (
               <section key={groupName} className="card overflow-hidden">
                 <div className="flex items-center gap-3 border-b border-surface-border bg-surface-dim px-5 py-3.5">
@@ -69,9 +83,7 @@ export default async function StepsPage() {
                   </span>
                   <div>
                     <h2 className="text-sm font-bold text-ink">{groupName}</h2>
-                    {meta?.desc && (
-                      <p className="text-xs text-ink-faint">{meta.desc}</p>
-                    )}
+                    {desc && <p className="text-xs text-ink-faint">{desc}</p>}
                   </div>
                   <span className="ml-auto text-xs text-ink-faint">
                     {list.length}문제
@@ -92,3 +104,4 @@ export default async function StepsPage() {
     </div>
   );
 }
+

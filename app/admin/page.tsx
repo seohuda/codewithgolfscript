@@ -74,9 +74,14 @@ export default function AdminPage() {
     <div className="animate-fade-in space-y-6">
       <div className="flex items-end justify-between">
         <h1 className="text-2xl font-bold text-ink">관리자 · 문제 관리</h1>
-        <Link href="/admin/problems/new" className="btn-filled">
-          새 문제
-        </Link>
+        <div className="flex gap-2">
+          <Link href="/admin/steps" className="btn-outlined">
+            단계 관리
+          </Link>
+          <Link href="/admin/problems/new" className="btn-filled">
+            새 문제
+          </Link>
+        </div>
       </div>
 
       {fetching ? (
