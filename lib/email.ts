@@ -18,9 +18,12 @@ export function siteUrl(): string {
 
 async function sendEmail(to: string, subject: string, html: string, text: string) {
   const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.EMAIL_FROM;
-  if (!apiKey || !from) {
-    throw new Error("RESEND_API_KEY or EMAIL_FROM is not configured.");
+  // Fall back to a safe sender on the verified domain if EMAIL_FROM is
+  // missing or got mangled in the environment (spaces/angle brackets can
+  // break env var delivery on some hosts).
+  const from = process.env.EMAIL_FROM || "no-reply@golfscript.xyz";
+  if (!apiKey) {
+    throw new Error("RESEND_API_KEY is not configured.");
   }
 
   const res = await fetch("https://api.resend.com/emails", {

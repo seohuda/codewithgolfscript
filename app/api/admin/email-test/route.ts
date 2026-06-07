@@ -54,12 +54,12 @@ export async function POST(req: NextRequest) {
   }
 
   const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.EMAIL_FROM;
-  if (!apiKey || !from) {
+  const from = process.env.EMAIL_FROM || "no-reply@golfscript.xyz";
+  if (!apiKey) {
     return NextResponse.json({
       ok: false,
       stage: "config",
-      error: "RESEND_API_KEY 또는 EMAIL_FROM 환경변수가 비어 있습니다.",
+      error: "RESEND_API_KEY 환경변수가 비어 있습니다.",
     });
   }
 
