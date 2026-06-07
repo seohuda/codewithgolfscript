@@ -21,6 +21,9 @@ export default function HeaderNav() {
   if (user) {
     return (
       <div className="flex items-center gap-3 text-sm">
+        <Link href="/me/submissions" className="btn-text hidden sm:inline-flex">
+          내 제출
+        </Link>
         <Link
           href={`/users/${encodeURIComponent(user.username)}`}
           className="hidden text-ink-soft hover:text-primary sm:inline"
