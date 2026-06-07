@@ -5,6 +5,9 @@ import { verifySessionToken, SESSION_COOKIE } from "@/lib/auth";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+// Minimum number of votes before the average is shown / reflected.
+const MIN_VOTES = 3;
+
 // GET /api/problems/[id]/vote — vote summary + my vote
 export async function GET(
   req: NextRequest,
@@ -24,18 +27,29 @@ export async function GET(
   const list = votes ?? [];
   const count = list.length;
   const avg =
-    count > 0
+    count >= MIN_VOTES
       ? Math.round(list.reduce((a, v) => a + (v.tier as number), 0) / count)
       : null;
 
   let myVote: number | null = null;
+  let canVote = false;
   const session = verifySessionToken(req.cookies.get(SESSION_COOKIE)?.value);
   if (session) {
     const mine = list.find((v) => v.user_id === session.userId);
     myVote = mine ? (mine.tier as number) : null;
+    // Only users who solved (AC) this problem may vote.
+    const { data: ac } = await admin
+      .from("submissions")
+      .select("id")
+      .eq("user_id", session.userId)
+      .eq("problem_id", problemId)
+      .eq("verdict", "AC")
+      .limit(1)
+      .maybeSingle();
+    canVote = !!ac;
   }
 
-  return NextResponse.json({ count, avg, myVote });
+  return NextResponse.json({ count, avg, myVote, canVote, minVotes: MIN_VOTES });
 }
 
 // POST /api/problems/[id]/vote  { tier }  — cast/update my difficulty vote
@@ -63,6 +77,23 @@ export async function POST(
   }
 
   const admin = getSupabaseAdminClient();
+
+  // Only users who have solved (AC) this problem may vote on its difficulty.
+  const { data: ac } = await admin
+    .from("submissions")
+    .select("id")
+    .eq("user_id", session.userId)
+    .eq("problem_id", problemId)
+    .eq("verdict", "AC")
+    .limit(1)
+    .maybeSingle();
+  if (!ac) {
+    return NextResponse.json(
+      { error: "문제를 푼 사람만 난이도를 투표할 수 있습니다." },
+      { status: 403 },
+    );
+  }
+
   const { error } = await admin
     .from("difficulty_votes")
     .upsert(
