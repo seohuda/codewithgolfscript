@@ -131,10 +131,10 @@ export default function CodeEditor({ problemId, onAccepted }: CodeEditorProps) {
           </span>
           <span className="flex items-baseline gap-1.5">
             <span className="text-xs text-ink-faint">크기</span>
-            <span className="font-mono text-lg font-bold text-primary tabular-nums">
+            <span className="font-mono text-lg font-bold text-accent tabular-nums">
               {bytes}
             </span>
-            <span className="text-xs font-medium text-primary">바이트</span>
+            <span className="text-xs font-medium text-accent">바이트</span>
           </span>
         </div>
       </div>
@@ -158,7 +158,7 @@ export default function CodeEditor({ problemId, onAccepted }: CodeEditorProps) {
           <span className="text-sm text-ink-faint">
             <Link
               href={`/users/${encodeURIComponent(user.username)}`}
-              className="font-medium text-ink-soft hover:text-primary hover:underline"
+              className="font-medium text-ink-soft hover:text-accent hover:underline"
             >
               {user.username}
             </Link>{" "}
@@ -189,7 +189,7 @@ export default function CodeEditor({ problemId, onAccepted }: CodeEditorProps) {
                 {result.total} 케이스
               </span>
               <span>
-                <span className="font-mono font-semibold text-primary">
+                <span className="font-mono font-semibold text-accent">
                   {result.bytes}
                 </span>{" "}
                 바이트
@@ -227,7 +227,7 @@ export default function CodeEditor({ problemId, onAccepted }: CodeEditorProps) {
                     {result.bytes}
                   </span>
                   바이트 · 현재 최단{" "}
-                  <span className="font-mono font-semibold text-primary">
+                  <span className="font-mono font-semibold text-accent">
                     {result.bestBytes}
                   </span>
                   바이트

@@ -27,7 +27,7 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
-      <body className="min-h-screen bg-surface-dim font-sans text-ink antialiased">
+      <body className="flex min-h-screen flex-col bg-surface-dim font-sans text-ink antialiased">
         <ThemeProvider>
           <AuthProvider>
             {/* Accent ticker */}
@@ -57,7 +57,7 @@ export default function RootLayout({
                     gs
                   </span>
                   <span className="text-base font-extrabold uppercase tracking-tight text-ink">
-                    CODE/GOLF<span className="text-accent">SCRIPT</span>
+                    CODE WITH GOLF<span className="text-accent">SCRIPT</span>
                   </span>
                 </Link>
 
@@ -95,12 +95,14 @@ export default function RootLayout({
               </div>
             </header>
 
-            <main className="mx-auto max-w-6xl px-4 py-10">{children}</main>
+            <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10">
+              {children}
+            </main>
 
-            <footer className="mt-16 border-t border-surface-border bg-surface">
+            <footer className="border-t border-surface-border bg-surface">
               <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-8">
                 <span className="text-lg font-extrabold uppercase tracking-tight text-ink">
-                  CODE/GOLF<span className="text-accent">SCRIPT</span>
+                  CODE WITH GOLF<span className="text-accent">SCRIPT</span>
                 </span>
                 <span className="eyebrow">
                   Ranked by exact UTF-8 byte count — fewer bytes, higher rank.

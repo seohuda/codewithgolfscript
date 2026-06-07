@@ -43,7 +43,7 @@ export default async function ProblemPage({
   return (
     <div className="animate-fade-in space-y-6">
       <div className="flex items-center gap-2 text-sm text-ink-faint">
-        <Link href="/problems" className="hover:text-primary hover:underline">
+        <Link href="/problems" className="hover:text-accent hover:underline">
           문제
         </Link>
         <span>/</span>

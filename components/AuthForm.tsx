@@ -127,14 +127,14 @@ export default function AuthForm({ mode }: AuthFormProps) {
         {isSignup ? (
           <>
             이미 계정이 있으신가요?{" "}
-            <Link href="/login" className="font-medium text-primary hover:underline">
+            <Link href="/login" className="font-medium text-accent hover:underline">
               로그인
             </Link>
           </>
         ) : (
           <>
             아직 계정이 없으신가요?{" "}
-            <Link href="/signup" className="font-medium text-primary hover:underline">
+            <Link href="/signup" className="font-medium text-accent hover:underline">
               회원가입
             </Link>
           </>

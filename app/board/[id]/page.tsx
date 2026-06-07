@@ -177,7 +177,7 @@ export default function PostDetailPage() {
   return (
     <div className="animate-fade-in space-y-6">
       <div className="flex items-center gap-2 text-sm text-ink-faint">
-        <Link href="/board" className="hover:text-primary hover:underline">
+        <Link href="/board" className="hover:text-accent hover:underline">
           게시판
         </Link>
         <span>/</span>
@@ -188,7 +188,7 @@ export default function PostDetailPage() {
         <div className="flex items-start justify-between gap-4">
           <h1 className="text-xl font-bold text-ink">
             {post.is_notice && (
-              <span className="mr-2 rounded bg-primary px-1.5 py-0.5 align-middle text-[11px] font-bold text-white">
+              <span className="mr-2 rounded bg-accent px-1.5 py-0.5 align-middle text-[11px] font-bold text-white">
                 공지
               </span>
             )}
@@ -216,7 +216,7 @@ export default function PostDetailPage() {
           <span
             className={
               post.author_is_admin
-                ? "font-semibold text-primary"
+                ? "font-semibold text-accent"
                 : "font-medium text-ink-soft"
             }
           >
@@ -232,7 +232,7 @@ export default function PostDetailPage() {
 
       <section className="space-y-4">
         <h2 className="text-sm font-bold text-ink">
-          댓글 <span className="text-primary">{comments.length}</span>
+          댓글 <span className="text-accent">{comments.length}</span>
         </h2>
 
         {comments.length > 0 && (
@@ -247,7 +247,7 @@ export default function PostDetailPage() {
                       <span
                         className={
                           c.author_is_admin
-                            ? "font-semibold text-primary"
+                            ? "font-semibold text-accent"
                             : "font-medium text-ink-soft"
                         }
                       >
@@ -260,7 +260,7 @@ export default function PostDetailPage() {
                       <div className="flex gap-2">
                         <button
                           onClick={() => startEdit(c)}
-                          className="text-ink-soft hover:text-primary"
+                          className="text-ink-soft hover:text-accent"
                         >
                           수정
                         </button>
@@ -325,7 +325,7 @@ export default function PostDetailPage() {
           </form>
         ) : (
           <div className="card p-4 text-center text-sm text-ink-soft">
-            <Link href="/login" className="font-medium text-primary hover:underline">
+            <Link href="/login" className="font-medium text-accent hover:underline">
               로그인
             </Link>{" "}
             후 댓글을 작성할 수 있습니다.

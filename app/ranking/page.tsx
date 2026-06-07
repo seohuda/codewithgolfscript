@@ -91,7 +91,7 @@ export default function RankingPage() {
                   <td className="px-4 py-3 text-right text-ink">
                     {e.solvedCount}
                   </td>
-                  <td className="px-4 py-3 text-right font-mono font-bold text-primary">
+                  <td className="px-4 py-3 text-right font-mono font-bold text-accent">
                     {e.score}
                   </td>
                 </tr>

@@ -93,7 +93,7 @@ export default function MySubmissionsPage() {
       ) : subs.length === 0 ? (
         <div className="card p-10 text-center text-sm text-ink-soft">
           아직 제출한 코드가 없습니다.{" "}
-          <Link href="/problems" className="text-primary hover:underline">
+          <Link href="/problems" className="text-accent hover:underline">
             문제 풀러 가기
           </Link>
         </div>
@@ -123,7 +123,7 @@ export default function MySubmissionsPage() {
                       <td className="px-4 py-3">
                         <Link
                           href={`/problems/${s.problemId}`}
-                          className="font-medium text-primary hover:underline"
+                          className="font-medium text-accent hover:underline"
                         >
                           {s.problemTitle}
                         </Link>
@@ -145,7 +145,7 @@ export default function MySubmissionsPage() {
                       <td className="px-4 py-3 text-right">
                         <button
                           onClick={() => setExpanded(isOpen ? null : s.id)}
-                          className="text-xs font-medium text-primary hover:underline"
+                          className="text-xs font-medium text-accent hover:underline"
                         >
                           {isOpen ? "닫기" : "보기"}
                         </button>

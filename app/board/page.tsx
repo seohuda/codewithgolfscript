@@ -98,7 +98,7 @@ export default function BoardPage() {
             onClick={() => setTab(t.key)}
             className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
               tab === t.key
-                ? "border-primary text-primary"
+                ? "border-accent text-accent"
                 : "border-transparent text-ink-soft hover:text-ink"
             }`}
           >
@@ -138,7 +138,7 @@ export default function BoardPage() {
                 >
                   <td className="px-4 py-3">
                     {p.is_notice ? (
-                      <span className="rounded bg-primary px-1.5 py-0.5 text-[10px] font-bold text-white">
+                      <span className="bg-accent px-1.5 py-0.5 text-[10px] font-bold text-white">
                         공지
                       </span>
                     ) : (
@@ -150,12 +150,12 @@ export default function BoardPage() {
                   <td className="px-4 py-3">
                     <Link
                       href={`/board/${p.id}`}
-                      className="font-medium text-ink hover:text-primary hover:underline"
+                      className="font-medium text-ink hover:text-accent hover:underline"
                     >
                       {p.title}
                     </Link>
                     {p.comment_count > 0 && (
-                      <span className="ml-2 text-xs font-semibold text-primary">
+                      <span className="ml-2 text-xs font-semibold text-accent">
                         [{p.comment_count}]
                       </span>
                     )}
@@ -164,7 +164,7 @@ export default function BoardPage() {
                     <span
                       className={
                         p.author_is_admin
-                          ? "font-semibold text-primary"
+                          ? "font-semibold text-accent"
                           : "text-ink-soft"
                       }
                     >

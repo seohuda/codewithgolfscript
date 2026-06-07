@@ -131,7 +131,7 @@ export default function ProfilePage() {
               {user.username}
             </h1>
             {user.is_admin && (
-              <span className="chip border-primary/30 bg-primary-container/50 text-primary">
+              <span className="chip border-primary/30 bg-primary-container/50 text-accent">
                 관리자
               </span>
             )}
@@ -142,7 +142,7 @@ export default function ProfilePage() {
         </div>
         <div className="text-right">
           <p className="text-xs text-ink-soft">점수</p>
-          <p className="text-2xl font-bold text-primary">{stats.score}</p>
+          <p className="text-2xl font-bold text-accent">{stats.score}</p>
         </div>
       </section>
 
@@ -168,7 +168,7 @@ export default function ProfilePage() {
         </div>
         <div className="card p-5">
           <p className="text-xs text-ink-soft">정답률</p>
-          <p className="mt-1 text-2xl font-bold text-primary">
+          <p className="mt-1 text-2xl font-bold text-accent">
             {stats.acceptanceRate}%
           </p>
         </div>
@@ -224,7 +224,7 @@ export default function ProfilePage() {
                     <td className="px-4 py-3">
                       <Link
                         href={`/problems/${p.id}`}
-                        className="font-medium text-primary hover:underline"
+                        className="font-medium text-accent hover:underline"
                       >
                         {p.title}
                       </Link>

@@ -26,7 +26,7 @@ export default function HeaderNav() {
         </Link>
         <Link
           href={`/users/${encodeURIComponent(user.username)}`}
-          className="hidden text-ink-soft hover:text-primary sm:inline"
+          className="hidden text-ink-soft hover:text-accent sm:inline"
         >
           <span className="font-semibold text-ink">{user.username}</span> 님
         </Link>

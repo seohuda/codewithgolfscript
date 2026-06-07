@@ -53,7 +53,7 @@ export default function WritePage() {
   return (
     <div className="animate-fade-in space-y-6">
       <div className="flex items-center gap-2 text-sm text-ink-faint">
-        <Link href="/board" className="hover:text-primary hover:underline">
+        <Link href="/board" className="hover:text-accent hover:underline">
           게시판
         </Link>
         <span>/</span>
@@ -99,7 +99,7 @@ export default function WritePage() {
               type="checkbox"
               checked={isNotice}
               onChange={(e) => setIsNotice(e.target.checked)}
-              className="h-4 w-4 accent-primary"
+              className="h-4 w-4 accent-accent"
             />
             공지로 등록 (관리자)
           </label>

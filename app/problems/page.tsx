@@ -237,7 +237,7 @@ export default function ProblemsPage() {
               type="checkbox"
               checked={unsolvedOnly}
               onChange={(e) => setUnsolvedOnly(e.target.checked)}
-              className="h-4 w-4 accent-primary"
+              className="h-4 w-4 accent-accent"
             />
             안 푼 문제만 보기
           </label>
@@ -297,7 +297,7 @@ export default function ProblemsPage() {
                           ? "text-success"
                           : user && statusOf(p.id) === "tried"
                             ? "text-danger"
-                            : "text-primary"
+                            : "text-accent"
                       }`}
                     >
                       {p.title}
@@ -339,7 +339,7 @@ export default function ProblemsPage() {
               onClick={() => setPage(n)}
               className={`rounded-md px-3 py-1.5 text-sm transition-colors ${
                 n === page
-                  ? "bg-primary font-semibold text-white"
+                  ? "bg-accent font-semibold text-white"
                   : "text-ink-soft hover:bg-surface-variant"
               }`}
             >

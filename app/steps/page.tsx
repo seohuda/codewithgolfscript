@@ -67,7 +67,7 @@ export default async function StepsPage() {
             return (
               <section key={groupName} className="card overflow-hidden">
                 <div className="flex items-center gap-3 border-b border-surface-border bg-surface-dim px-5 py-3.5">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center bg-accent font-mono text-xs font-bold text-white">
                     {gi + 1}
                   </span>
                   <div>

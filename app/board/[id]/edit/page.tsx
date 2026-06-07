@@ -86,7 +86,7 @@ export default function EditPostPage() {
   return (
     <div className="animate-fade-in space-y-6">
       <div className="flex items-center gap-2 text-sm text-ink-faint">
-        <Link href={`/board/${id}`} className="hover:text-primary hover:underline">
+        <Link href={`/board/${id}`} className="hover:text-accent hover:underline">
           글로 돌아가기
         </Link>
         <span>/</span>

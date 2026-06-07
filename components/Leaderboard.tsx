@@ -144,7 +144,7 @@ export default function Leaderboard({
                     tier={tierMap[row.username] ?? 0}
                   />
                 </td>
-                <td className="px-4 py-2.5 text-right font-mono font-semibold text-primary">
+                <td className="px-4 py-2.5 text-right font-mono font-semibold text-accent">
                   {row.bytes}
                 </td>
                 <td className="px-4 py-2.5 text-right font-mono text-xs text-ink-faint">
