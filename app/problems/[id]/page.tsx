@@ -15,7 +15,7 @@ async function fetchProblem(id: number): Promise<Problem | null> {
     const { data, error } = await admin
       .from("problems")
       .select(
-        "id, title, description, input_desc, output_desc, tier, source, sample_input, sample_output, image_url, created_at",
+        "id, title, description, input_desc, output_desc, tier, source, sample_input, sample_output, image_url, tags, created_at",
       )
       .eq("id", id)
       .maybeSingle();
@@ -61,6 +61,20 @@ export default async function ProblemPage({
         <p className="text-xs text-ink-faint">
           출처: <span className="text-ink-soft">{problem.source}</span>
         </p>
+      )}
+
+      {problem.tags && problem.tags.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {problem.tags.map((tag) => (
+            <Link
+              key={tag}
+              href={`/problems?tag=${encodeURIComponent(tag)}`}
+              className="border border-surface-border bg-surface-variant px-2 py-0.5 text-xs text-ink-soft hover:text-accent"
+            >
+              #{tag}
+            </Link>
+          ))}
+        </div>
       )}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">

@@ -51,6 +51,7 @@ export default function EditProblemPage() {
           sample_input: p.sample_input ?? "",
           sample_output: p.sample_output ?? "",
           image_url: p.image_url ?? "",
+          tags: Array.isArray(p.tags) ? p.tags : [],
         });
         setCases(
           (data.cases ?? []).map((c: TestCaseDraft) => ({

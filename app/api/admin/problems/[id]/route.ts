@@ -10,6 +10,17 @@ function normalize(s: string): string {
   return s.replace(/\r\n/g, "\n").replace(/\r/g, "\n").trim();
 }
 
+function cleanTags(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  const out: string[] = [];
+  for (const t of raw) {
+    const s = String(t ?? "").trim().slice(0, 20);
+    if (s && !out.includes(s)) out.push(s);
+    if (out.length >= 10) break;
+  }
+  return out;
+}
+
 interface CaseInput {
   stdin: string;
   stdout: string;
@@ -34,7 +45,7 @@ export async function GET(
   const { data: problem } = await admin
     .from("problems")
     .select(
-      "id, title, description, input_desc, output_desc, tier, source, step_group, step_order, sample_input, sample_output, image_url",
+      "id, title, description, input_desc, output_desc, tier, source, step_group, step_order, sample_input, sample_output, image_url, tags",
     )
     .eq("id", id)
     .maybeSingle();
@@ -115,6 +126,7 @@ export async function PATCH(
       sample_input: String(body.sample_input ?? ""),
       sample_output: String(body.sample_output ?? ""),
       image_url: String(body.image_url ?? ""),
+      tags: cleanTags(body.tags),
     })
     .eq("id", id);
 

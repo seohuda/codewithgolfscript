@@ -12,6 +12,7 @@ interface Row {
   tier: number;
   source: string | null;
   step_group: string | null;
+  tags: string[] | null;
   solvedCount: number;
   acRate: number;
 }
@@ -70,6 +71,7 @@ export default function ProblemsPage() {
   const [query, setQuery] = useState("");
   const [tierGroup, setTierGroup] = useState("");
   const [stepGroup, setStepGroup] = useState("");
+  const [tag, setTag] = useState("");
   const [sort, setSort] = useState<"tier" | "id">("tier");
   const [unsolvedOnly, setUnsolvedOnly] = useState(false);
 
@@ -78,6 +80,28 @@ export default function ProblemsPage() {
   const [stepGroups, setStepGroups] = useState<{ id: number; name: string }[]>(
     [],
   );
+  const [tags, setTags] = useState<{ name: string; count: number }[]>([]);
+
+  // Read an initial ?tag= filter from the URL (e.g. from a problem page).
+  useEffect(() => {
+    const sp = new URLSearchParams(window.location.search);
+    const t = sp.get("tag");
+    if (t) setTag(t);
+  }, []);
+
+  // Load tags for the filter dropdown.
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/problems/tags", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d) => {
+        if (!cancelled) setTags(d.tags ?? []);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Load step groups for the filter dropdown.
   useEffect(() => {
@@ -126,6 +150,7 @@ export default function ProblemsPage() {
       params.set("sort", sort);
       params.set("page", String(page));
       if (stepGroup) params.set("group", stepGroup);
+      if (tag) params.set("tag", tag);
       const opt = TIER_OPTIONS.find((o) => o.value === tierGroup);
       if (opt && opt.min !== undefined) {
         params.set("tierMin", String(opt.min));
@@ -148,7 +173,7 @@ export default function ProblemsPage() {
     } finally {
       setLoading(false);
     }
-  }, [query, sort, page, tierGroup, stepGroup]);
+  }, [query, sort, page, tierGroup, stepGroup, tag]);
 
   useEffect(() => {
     load();
@@ -232,6 +257,21 @@ export default function ProblemsPage() {
               {stepGroups.map((g) => (
                 <option key={g.id} value={g.name}>
                   {g.name}
+                </option>
+              ))}
+            </select>
+            <select
+              value={tag}
+              onChange={(e) => {
+                setTag(e.target.value);
+                setPage(1);
+              }}
+              className="field w-auto"
+            >
+              <option value="">전체 태그</option>
+              {tags.map((t) => (
+                <option key={t.name} value={t.name}>
+                  {t.name} ({t.count})
                 </option>
               ))}
             </select>

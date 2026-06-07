@@ -18,6 +18,7 @@ const emptyDraft: ProblemDraft = {
   sample_input: "",
   sample_output: "",
   image_url: "",
+  tags: [],
 };
 
 export default function NewProblemPage() {

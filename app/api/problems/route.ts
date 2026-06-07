@@ -13,6 +13,7 @@ export async function GET(req: NextRequest) {
   const tierMin = searchParams.get("tierMin");
   const tierMax = searchParams.get("tierMax");
   const group = (searchParams.get("group") ?? "").trim();
+  const tag = (searchParams.get("tag") ?? "").trim();
   const sort = searchParams.get("sort") === "id" ? "id" : "tier";
   const page = Math.max(1, Number(searchParams.get("page") ?? "1") || 1);
 
@@ -20,7 +21,7 @@ export async function GET(req: NextRequest) {
     const admin = getSupabaseAdminClient();
     let query = admin
       .from("problems")
-      .select("id, title, tier, source, step_group", { count: "exact" });
+      .select("id, title, tier, source, step_group, tags", { count: "exact" });
 
     if (q) {
       // Escape PostgREST/LIKE wildcards so user input is treated literally.
@@ -28,6 +29,7 @@ export async function GET(req: NextRequest) {
       if (safe) query = query.ilike("title", `%${safe}%`);
     }
     if (group) query = query.eq("step_group", group);
+    if (tag) query = query.contains("tags", [tag]);
     if (tierMin !== null && tierMin !== "") {
       const t = Number(tierMin);
       if (Number.isFinite(t)) query = query.gte("tier", t);

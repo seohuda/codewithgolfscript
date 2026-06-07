@@ -30,6 +30,19 @@ interface ProblemInput {
   image_url?: string;
   solution?: string; // optional reference solution to validate cases
   cases?: CaseInput[];
+  tags?: string[];
+}
+
+// Normalize a tag list: trim, drop empties, dedupe, cap length & count.
+function cleanTags(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  const out: string[] = [];
+  for (const t of raw) {
+    const s = String(t ?? "").trim().slice(0, 20);
+    if (s && !out.includes(s)) out.push(s);
+    if (out.length >= 10) break;
+  }
+  return out;
 }
 
 // GET /api/admin/problems — list all problems (admin)
@@ -107,6 +120,7 @@ export async function POST(req: NextRequest) {
       sample_input: body.sample_input ?? "",
       sample_output: body.sample_output ?? "",
       image_url: body.image_url ?? "",
+      tags: cleanTags(body.tags),
     })
     .select("id")
     .single();

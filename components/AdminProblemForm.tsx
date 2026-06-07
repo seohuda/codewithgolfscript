@@ -22,6 +22,7 @@ export interface ProblemDraft {
   sample_input: string;
   sample_output: string;
   image_url: string;
+  tags: string[];
 }
 
 interface Props {
@@ -45,6 +46,7 @@ export default function AdminProblemForm({
     initialCases.length ? initialCases : [{ ...empty }],
   );
   const [solution, setSolution] = useState("");
+  const [tagInput, setTagInput] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -67,6 +69,20 @@ export default function AdminProblemForm({
 
   function set<K extends keyof ProblemDraft>(k: K, v: ProblemDraft[K]) {
     setP((prev) => ({ ...prev, [k]: v }));
+  }
+
+  function addTag() {
+    const raw = tagInput.trim().replace(/,$/, "").trim();
+    if (!raw) {
+      setTagInput("");
+      return;
+    }
+    setP((prev) =>
+      prev.tags.includes(raw) || prev.tags.length >= 10
+        ? prev
+        : { ...prev, tags: [...prev.tags, raw.slice(0, 20)] },
+    );
+    setTagInput("");
   }
 
   async function handleUpload(file: File) {
@@ -197,6 +213,47 @@ export default function AdminProblemForm({
               className="field"
             />
           </div>
+        </div>
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium text-ink">
+            태그 (쉼표 또는 Enter로 구분)
+          </label>
+          <div className="flex flex-wrap items-center gap-2">
+            {p.tags.map((tag, i) => (
+              <span
+                key={i}
+                className="inline-flex items-center gap-1 border border-surface-border bg-surface-variant px-2 py-1 text-xs text-ink-soft"
+              >
+                {tag}
+                <button
+                  type="button"
+                  onClick={() =>
+                    set(
+                      "tags",
+                      p.tags.filter((_, idx) => idx !== i),
+                    )
+                  }
+                  className="text-ink-faint hover:text-danger"
+                  aria-label={`${tag} 태그 제거`}
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+          <input
+            value={tagInput}
+            onChange={(e) => setTagInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === ",") {
+                e.preventDefault();
+                addTag();
+              }
+            }}
+            onBlur={addTag}
+            placeholder="예: 수학, 문자열, 정렬"
+            className="field"
+          />
         </div>
         <div className="space-y-1.5">
           <label className="text-sm font-medium text-ink">설명</label>

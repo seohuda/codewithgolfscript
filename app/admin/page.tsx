@@ -75,6 +75,9 @@ export default function AdminPage() {
       <div className="flex items-end justify-between">
         <h1 className="text-2xl font-bold text-ink">관리자 · 문제 관리</h1>
         <div className="flex gap-2">
+          <Link href="/admin/stats" className="btn-outlined">
+            통계
+          </Link>
           <Link href="/admin/steps" className="btn-outlined">
             단계 관리
           </Link>
