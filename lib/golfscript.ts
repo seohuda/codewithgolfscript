@@ -216,6 +216,14 @@ function coerceTo(v: GSVal, target: GSType): GSVal {
 // ----------------------------------------------------------------------
 // Interpreter
 // ----------------------------------------------------------------------
+
+// Hard cap on the size of any single string or array a program can
+// build in one operation. Without this, expressions like `1e9,` or
+// `"x"1e9*` would allocate gigabytes and exhaust server memory in a
+// single step (the step guard only runs between tokens). This bounds
+// memory-based DoS regardless of how the judge is hosted.
+const MAX_COLLECTION = 5_000_000;
+
 class Interpreter {
   stack: GSVal[] = [];
   vars: Map<string, GSVal> = new Map();
@@ -568,10 +576,18 @@ class Interpreter {
     if (numVal && seqVal.t !== "num" && seqVal.t !== "block") {
       const count = Math.max(0, numVal.n ?? 0);
       if (seqVal.t === "str") {
+        const len = (seqVal.s ?? "").length * count;
+        if (len > MAX_COLLECTION) {
+          throw new GolfError("Result too large", true);
+        }
         this.push(str((seqVal.s ?? "").repeat(count)));
       } else {
+        const base = seqVal.a ?? [];
+        if (base.length * count > MAX_COLLECTION) {
+          throw new GolfError("Result too large", true);
+        }
         const out: GSVal[] = [];
-        for (let i = 0; i < count; i++) out.push(...(seqVal.a ?? []));
+        for (let i = 0; i < count; i++) out.push(...base);
         this.push(arr(out));
       }
       return;
@@ -754,6 +770,9 @@ class Interpreter {
     // num , → range [0, n)
     if (a.t === "num") {
       const n = Math.max(0, a.n ?? 0);
+      if (n > MAX_COLLECTION) {
+        throw new GolfError("Range too large", true);
+      }
       const out: GSVal[] = [];
       for (let i = 0; i < n; i++) out.push(num(i));
       this.push(arr(out));
