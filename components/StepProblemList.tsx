@@ -44,7 +44,7 @@ export default function StepProblemList({
                     ? "text-success"
                     : isTried
                       ? "text-danger"
-                      : "text-ink"
+                      : "text-blue-600 dark:text-blue-400"
                 }`}
               >
                 {p.title}

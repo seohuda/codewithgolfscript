@@ -297,7 +297,7 @@ export default function ProblemsPage() {
                           ? "text-success"
                           : user && statusOf(p.id) === "tried"
                             ? "text-danger"
-                            : "text-accent"
+                            : "text-blue-600 dark:text-blue-400"
                       }`}
                     >
                       {p.title}

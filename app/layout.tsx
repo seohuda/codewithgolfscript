@@ -30,26 +30,6 @@ export default function RootLayout({
       <body className="flex min-h-screen flex-col bg-surface-dim font-sans text-ink antialiased">
         <ThemeProvider>
           <AuthProvider>
-            {/* Accent ticker */}
-            <div className="overflow-hidden border-b border-surface-border bg-accent text-white">
-              <div className="flex whitespace-nowrap py-1 font-mono text-[11px] uppercase tracking-widest">
-                <div className="flex shrink-0 animate-marquee gap-8 pr-8">
-                  {Array.from({ length: 2 }).map((_, i) => (
-                    <span key={i} className="flex gap-8">
-                      <span>SHORTER IS BETTER</span>
-                      <span>·</span>
-                      <span>BYTES NOT LINES</span>
-                      <span>·</span>
-                      <span>GOLFSCRIPT ONLY</span>
-                      <span>·</span>
-                      <span>CODE WITH GOLFSCRIPT</span>
-                      <span>·</span>
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-
             <header className="sticky top-0 z-40 border-b border-surface-border bg-surface/90 backdrop-blur-md">
               <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-4">
                 <Link href="/" className="flex items-center gap-2.5">
