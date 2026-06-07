@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
 
   const { data: user, error } = await admin
     .from("users")
-    .select("id, username, password_hash")
+    .select("id, username, password_hash, is_admin")
     .ilike("username", username)
     .maybeSingle();
 
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
     username: user.username as string,
   });
   const res = NextResponse.json({
-    user: { id: user.id, username: user.username },
+    user: { id: user.id, username: user.username, isAdmin: !!user.is_admin },
   });
   res.cookies.set(SESSION_COOKIE, token, SESSION_COOKIE_OPTIONS);
   return res;

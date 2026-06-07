@@ -11,6 +11,7 @@ import {
 export interface AuthUser {
   id: string;
   username: string;
+  isAdmin?: boolean;
 }
 
 interface AuthContextValue {

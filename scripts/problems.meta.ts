@@ -314,6 +314,16 @@ const META: Record<string, ProblemMeta> = {
   "초를 시:분:초로": { sampleInput: "3725", source: "자체 제작 (정올 스타일)" },
   "최댓값과의 차이": { sampleInput: "80 95 60", source: "자체 제작 (정올 스타일)" },
   "등차수열의 합": { sampleInput: "3 2 5", source: "자체 제작 (정올 스타일)" },
+  "세 과목 평균": { sampleInput: "75 85 95", source: "자체 제작 (정올 스타일)" },
+  "거스름돈 동전 개수": { sampleInput: "770", source: "자체 제작 (정올 스타일)" },
+  "두 점 사이 거리의 제곱": { sampleInput: "1 2 4 6", source: "자체 제작 (정올 스타일)" },
+  "3의 배수의 합": { sampleInput: "12", source: "자체 제작 (정올 스타일)" },
+  "시저 암호": { sampleInput: "code", source: "자체 제작 (정올 스타일)" },
+  "모음 개수 세기": { sampleInput: "programming", source: "자체 제작 (정올 스타일)" },
+  "최고점과 최저점 제외 평균": { sampleInput: "9 3 7 5", source: "자체 제작 (정올 스타일)" },
+  "약수의 개수가 홀수인가": { sampleInput: "25", source: "자체 제작 (정올 스타일)" },
+  "구구단 한 줄": { sampleInput: "3", source: "자체 제작 (정올 스타일)" },
+  "최댓값 여러 개": { sampleInput: "4 4 2 4", source: "자체 제작 (정올 스타일)" },
 };
 
 export default META;

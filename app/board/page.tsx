@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useAuth } from "@/components/AuthProvider";
 
 interface PostRow {
   id: number;
   author: string;
+  author_is_admin: boolean;
   title: string;
+  is_notice: boolean;
   created_at: string;
   comment_count: number;
 }
@@ -26,32 +28,47 @@ function formatTime(iso: string): string {
   }
 }
 
+const TABS = [
+  { key: "all", label: "전체" },
+  { key: "notice", label: "공지" },
+  { key: "normal", label: "일반" },
+];
+
 export default function BoardPage() {
   const { user } = useAuth();
   const [posts, setPosts] = useState<PostRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [tab, setTab] = useState("all");
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/board?type=${tab}`, { cache: "no-store" });
+      const data = (await res.json()) as { posts?: PostRow[]; error?: string };
+      if (!res.ok) setError(data.error ?? "불러오기 실패");
+      else {
+        setError(null);
+        setPosts(data.posts ?? []);
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "오류");
+    } finally {
+      setLoading(false);
+    }
+  }, [tab]);
 
   useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      try {
-        const res = await fetch("/api/board", { cache: "no-store" });
-        const data = (await res.json()) as { posts?: PostRow[]; error?: string };
-        if (cancelled) return;
-        if (!res.ok) setError(data.error ?? "불러오기 실패");
-        else setPosts(data.posts ?? []);
-      } catch (e) {
-        if (!cancelled) setError(e instanceof Error ? e.message : "오류");
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
     load();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  }, [load]);
+
+  // For the "전체" tab, show notices first.
+  const sorted =
+    tab === "all"
+      ? [...posts].sort(
+          (a, b) => Number(b.is_notice) - Number(a.is_notice),
+        )
+      : posts;
 
   return (
     <div className="animate-fade-in space-y-6">
@@ -73,17 +90,32 @@ export default function BoardPage() {
         )}
       </div>
 
+      {/* Tabs */}
+      <div className="flex gap-1 border-b border-surface-border">
+        {TABS.map((t) => (
+          <button
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
+              tab === t.key
+                ? "border-primary text-primary"
+                : "border-transparent text-ink-soft hover:text-ink"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
       {loading ? (
         <div className="card p-10 text-center text-sm text-ink-faint">
           불러오는 중…
         </div>
       ) : error ? (
-        <div className="card p-10 text-center text-sm text-ink-soft">
-          {error}
-        </div>
-      ) : posts.length === 0 ? (
+        <div className="card p-10 text-center text-sm text-ink-soft">{error}</div>
+      ) : sorted.length === 0 ? (
         <div className="card p-10 text-center text-sm text-ink-faint">
-          아직 글이 없습니다. 첫 글을 작성해 보세요.
+          {tab === "notice" ? "공지가 없습니다." : "아직 글이 없습니다."}
         </div>
       ) : (
         <div className="card overflow-hidden">
@@ -97,13 +129,23 @@ export default function BoardPage() {
               </tr>
             </thead>
             <tbody>
-              {posts.map((p, i) => (
+              {sorted.map((p, i) => (
                 <tr
                   key={p.id}
-                  className="border-b border-surface-border last:border-0 hover:bg-surface-dim"
+                  className={`border-b border-surface-border last:border-0 hover:bg-surface-dim ${
+                    p.is_notice ? "bg-primary-container/20" : ""
+                  }`}
                 >
-                  <td className="px-4 py-3 font-mono text-ink-faint">
-                    {posts.length - i}
+                  <td className="px-4 py-3">
+                    {p.is_notice ? (
+                      <span className="rounded bg-primary px-1.5 py-0.5 text-[10px] font-bold text-white">
+                        공지
+                      </span>
+                    ) : (
+                      <span className="font-mono text-ink-faint">
+                        {sorted.length - i}
+                      </span>
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     <Link
@@ -118,8 +160,17 @@ export default function BoardPage() {
                       </span>
                     )}
                   </td>
-                  <td className="hidden px-4 py-3 text-ink-soft sm:table-cell">
-                    {p.author}
+                  <td className="hidden px-4 py-3 sm:table-cell">
+                    <span
+                      className={
+                        p.author_is_admin
+                          ? "font-semibold text-primary"
+                          : "text-ink-soft"
+                      }
+                    >
+                      {p.author}
+                      {p.author_is_admin && " (관리자)"}
+                    </span>
                   </td>
                   <td className="hidden px-4 py-3 font-mono text-xs text-ink-faint md:table-cell">
                     {formatTime(p.created_at)}

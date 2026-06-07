@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { getSupabaseBrowserClient } from "@/lib/supabase";
 import { LeaderboardRow } from "@/lib/types";
+import UserName from "./UserName";
 
 interface LeaderboardProps {
   problemId: number;
@@ -35,6 +35,7 @@ export default function Leaderboard({
   refreshKey = 0,
 }: LeaderboardProps) {
   const [rows, setRows] = useState<LeaderboardRow[]>([]);
+  const [tierMap, setTierMap] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -73,6 +74,27 @@ export default function Leaderboard({
       cancelled = true;
     };
   }, [problemId, refreshKey]);
+
+  // Fetch user tiers (for colored usernames).
+  useEffect(() => {
+    let cancelled = false;
+    async function loadTiers() {
+      try {
+        const res = await fetch("/api/ranking", { cache: "no-store" });
+        const data = await res.json();
+        if (cancelled) return;
+        const map: Record<string, number> = {};
+        for (const e of data.ranking ?? []) map[e.username] = e.tier;
+        setTierMap(map);
+      } catch {
+        /* ignore */
+      }
+    }
+    loadTiers();
+    return () => {
+      cancelled = true;
+    };
+  }, [refreshKey]);
 
   return (
     <div className="card mt-6 overflow-hidden">
@@ -116,13 +138,11 @@ export default function Leaderboard({
                     {row.rank}
                   </span>
                 </td>
-                <td className="px-4 py-2.5 text-ink">
-                  <Link
-                    href={`/users/${encodeURIComponent(row.username)}`}
-                    className="hover:text-primary hover:underline"
-                  >
-                    {row.username}
-                  </Link>
+                <td className="px-4 py-2.5">
+                  <UserName
+                    username={row.username}
+                    tier={tierMap[row.username] ?? 0}
+                  />
                 </td>
                 <td className="px-4 py-2.5 text-right font-mono font-semibold text-primary">
                   {row.bytes}

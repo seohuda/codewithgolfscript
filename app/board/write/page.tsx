@@ -10,6 +10,7 @@ export default function WritePage() {
   const { user, loading } = useAuth();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const [isNotice, setIsNotice] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -29,7 +30,11 @@ export default function WritePage() {
       const res = await fetch("/api/board", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: title.trim(), body: body.trim() }),
+        body: JSON.stringify({
+          title: title.trim(),
+          body: body.trim(),
+          isNotice,
+        }),
       });
       const data = (await res.json()) as { id?: number; error?: string };
       if (!res.ok || !data.id) {
@@ -87,6 +92,17 @@ export default function WritePage() {
           <p className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">
             {error}
           </p>
+        )}
+        {user?.isAdmin && (
+          <label className="flex items-center gap-2 text-sm text-ink">
+            <input
+              type="checkbox"
+              checked={isNotice}
+              onChange={(e) => setIsNotice(e.target.checked)}
+              className="h-4 w-4 accent-primary"
+            />
+            공지로 등록 (관리자)
+          </label>
         )}
         <div className="flex gap-3">
           <button type="submit" disabled={submitting} className="btn-filled">

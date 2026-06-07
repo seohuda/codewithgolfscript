@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import TierBadge from "@/components/TierBadge";
+import { getTierInfo } from "@/lib/tiers";
 
 interface SolvedProblem {
   id: number;
@@ -21,6 +22,8 @@ interface ProfileData {
     acceptanceRate: number;
     totalBytes: number;
     verdictCounts: Record<string, number>;
+    score: number;
+    userTier: number;
   };
   solvedProblems: SolvedProblem[];
 }
@@ -108,12 +111,23 @@ export default function ProfilePage() {
     <div className="animate-fade-in space-y-6">
       {/* Header card */}
       <section className="card flex flex-col gap-4 p-6 sm:flex-row sm:items-center">
-        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-primary text-2xl font-bold text-white">
-          {user.username.charAt(0).toUpperCase()}
+        <div className="flex flex-col items-center gap-1">
+          <TierBadge tier={stats.userTier} />
+          <span
+            className="text-xs font-bold"
+            style={{ color: getTierInfo(stats.userTier).color }}
+          >
+            {getTierInfo(stats.userTier).nameKo}
+          </span>
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-ink">{user.username}</h1>
+            <h1
+              className="text-2xl font-bold"
+              style={{ color: getTierInfo(stats.userTier).color }}
+            >
+              {user.username}
+            </h1>
             {user.is_admin && (
               <span className="chip border-primary/30 bg-primary-container/50 text-primary">
                 관리자
@@ -123,6 +137,10 @@ export default function ProfilePage() {
           <p className="mt-1 text-sm text-ink-faint">
             가입일 {formatDate(user.created_at)}
           </p>
+        </div>
+        <div className="text-right">
+          <p className="text-xs text-ink-soft">점수</p>
+          <p className="text-2xl font-bold text-primary">{stats.score}</p>
         </div>
       </section>
 

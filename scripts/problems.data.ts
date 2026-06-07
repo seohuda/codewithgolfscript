@@ -1919,6 +1919,159 @@ const P: SeedProblem[] = [
       { stdin: "5 0 3", stdout: "15", hidden: true },
     ],
   },
+
+  // ---- 정보올림피아드 입문 추가편 (자체 작성, GolfScript 풀이) -------
+  {
+    title: "세 과목 평균",
+    tier: 6,
+    source: "자체 제작 (정올 스타일)",
+    description:
+      "어떤 학생의 국어, 영어, 수학 점수가 주어집니다. 세 과목의 평균 점수를 내림하여 출력하세요. 세 점수는 모두 0 이상 100 이하의 정수입니다.",
+    inputDesc: "공백으로 구분된 세 정수 (국어, 영어, 수학 점수).",
+    outputDesc: "세 점수의 평균 (소수점 버림).",
+    solution: "~]:v 0=v 1=+v 2=+3/",
+    cases: [
+      { stdin: "80 90 100", stdout: "90" },
+      { stdin: "100 100 100", stdout: "100" },
+      { stdin: "70 80 85", stdout: "78", hidden: true },
+    ],
+  },
+  {
+    title: "거스름돈 동전 개수",
+    tier: 11,
+    source: "자체 제작 (정올 스타일)",
+    description:
+      "편의점 점원이 된 여러분. 거스름돈 n원을 500원, 100원, 50원, 10원짜리 동전으로 거슬러 줄 때, 가장 적은 동전 개수를 구하세요. (n은 10의 배수입니다.)",
+    inputDesc: "10의 배수인 0 이상의 정수 n.",
+    outputDesc: "필요한 최소 동전 개수.",
+    solution: "~:a 500/a 500%100/a 100%50/a 50%10/]{+}*",
+    cases: [
+      { stdin: "1260", stdout: "6" },
+      { stdin: "500", stdout: "1" },
+      { stdin: "0", stdout: "0", hidden: true },
+      { stdin: "990", stdout: "10", hidden: true },
+    ],
+  },
+  {
+    title: "두 점 사이 거리의 제곱",
+    tier: 9,
+    source: "자체 제작 (정올 스타일)",
+    description:
+      "좌표 평면 위의 두 점 (x1, y1)과 (x2, y2)가 주어집니다. 두 점 사이 거리의 제곱, 즉 (x2 − x1)² + (y2 − y1)²을 출력하세요.",
+    inputDesc: "공백으로 구분된 네 정수 x1 y1 x2 y2.",
+    outputDesc: "두 점 사이 거리의 제곱.",
+    solution: "~]:v;v 2=v 0=-.*v 3=v 1=-.*+",
+    cases: [
+      { stdin: "0 0 3 4", stdout: "25" },
+      { stdin: "1 1 1 1", stdout: "0" },
+      { stdin: "0 0 5 12", stdout: "169", hidden: true },
+    ],
+  },
+  {
+    title: "3의 배수의 합",
+    tier: 8,
+    source: "자체 제작 (정올 스타일)",
+    description:
+      "정수 n이 주어집니다. 1부터 n까지의 정수 중 3의 배수만 모두 더한 값을 출력하세요.",
+    inputDesc: "양의 정수 n.",
+    outputDesc: "1 이상 n 이하 3의 배수의 합.",
+    solution: "~),{3%!},{+}*",
+    cases: [
+      { stdin: "10", stdout: "18" },
+      { stdin: "3", stdout: "3" },
+      { stdin: "15", stdout: "45", hidden: true },
+    ],
+  },
+  {
+    title: "시저 암호",
+    tier: 10,
+    source: "자체 제작 (정올 스타일)",
+    description:
+      "고대 로마의 시저는 각 알파벳을 한 칸씩 뒤로 민 암호를 사용했습니다. 소문자로 된 문장의 각 글자를 다음 글자로 바꿔 출력하세요. 단, 'z'는 '{'가 되어도 무방하도록 입력에 'z'는 포함되지 않습니다.",
+    inputDesc: "z를 포함하지 않는 소문자 문자열.",
+    outputDesc: "각 글자를 한 칸씩 민 문자열.",
+    solution: "{)}%",
+    cases: [
+      { stdin: "abc", stdout: "bcd" },
+      { stdin: "hello", stdout: "ifmmp" },
+      { stdin: "golf", stdout: "hpmg", hidden: true },
+    ],
+  },
+  {
+    title: "모음 개수 세기",
+    tier: 11,
+    source: "자체 제작 (정올 스타일)",
+    description:
+      "영어 소문자 문자열에서 모음(a, e, i, o, u)의 개수를 세어 출력하세요.",
+    inputDesc: "영어 소문자 문자열.",
+    outputDesc: "모음의 개수.",
+    solution: '{"aeiou"\\?-1>},,',
+    cases: [
+      { stdin: "hello", stdout: "2" },
+      { stdin: "rhythm", stdout: "0" },
+      { stdin: "education", stdout: "5", hidden: true },
+    ],
+  },
+  {
+    title: "최고점과 최저점 제외 평균",
+    tier: 12,
+    source: "자체 제작 (정올 스타일)",
+    description:
+      "체조 경기 심사위원들의 점수가 주어집니다. 가장 높은 점수와 가장 낮은 점수를 하나씩 제외한 나머지 점수의 합을 출력하세요. (점수는 3개 이상입니다.)",
+    inputDesc: "공백으로 구분된 정수 점수들 (3개 이상).",
+    outputDesc: "최고점과 최저점을 제외한 점수들의 합.",
+    solution: "~]$1>-1<{+}*",
+    cases: [
+      { stdin: "10 5 8 9 1", stdout: "22" },
+      { stdin: "1 2 3", stdout: "2" },
+      { stdin: "7 7 7 7", stdout: "14", hidden: true },
+    ],
+  },
+  {
+    title: "약수의 개수가 홀수인가",
+    tier: 11,
+    source: "자체 제작 (정올 스타일)",
+    description:
+      "전구 n개가 일렬로 있습니다. i번째 사람이 i의 배수 번째 전구를 모두 toggle 합니다. n번 전구가 마지막에 켜져 있으면(약수의 개수가 홀수, 즉 완전제곱수) 1, 아니면 0을 출력하세요.",
+    inputDesc: "양의 정수 n.",
+    outputDesc: "완전제곱수이면 1, 아니면 0.",
+    solution: "~:n),{.*n=},,0>",
+    cases: [
+      { stdin: "9", stdout: "1" },
+      { stdin: "10", stdout: "0" },
+      { stdin: "16", stdout: "1", hidden: true },
+    ],
+  },
+  {
+    title: "구구단 한 줄",
+    tier: 8,
+    source: "자체 제작 (정올 스타일)",
+    description:
+      "정수 n을 입력받아 구구단 n단의 결과(n×1부터 n×9까지)를 공백으로 구분해 출력하세요.",
+    inputDesc: "1 이상 9 이하의 정수 n.",
+    outputDesc: "n×1 n×2 ... n×9.",
+    solution: "~:n;10,1>{n*}%' '*",
+    cases: [
+      { stdin: "2", stdout: "2 4 6 8 10 12 14 16 18" },
+      { stdin: "9", stdout: "9 18 27 36 45 54 63 72 81" },
+      { stdin: "5", stdout: "5 10 15 20 25 30 35 40 45", hidden: true },
+    ],
+  },
+  {
+    title: "최댓값 여러 개",
+    tier: 10,
+    source: "자체 제작 (정올 스타일)",
+    description:
+      "정수들이 주어집니다. 그중 최댓값이 몇 번 등장하는지 세어 출력하세요.",
+    inputDesc: "공백으로 구분된 정수들.",
+    outputDesc: "최댓값의 등장 횟수.",
+    solution: "~]:a$-1=:m;a{m=},,",
+    cases: [
+      { stdin: "3 1 3 2 3", stdout: "3" },
+      { stdin: "5 4 3", stdout: "1" },
+      { stdin: "7 7", stdout: "2", hidden: true },
+    ],
+  },
 ];
 
 export default P;

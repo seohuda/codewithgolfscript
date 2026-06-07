@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
+import { rateUser } from "@/lib/score";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -93,6 +94,8 @@ export async function GET(
         .sort((a, b) => b.tier - a.tier || a.title.localeCompare(b.title));
     }
 
+    const rating = rateUser(solvedProblems.map((p) => p.tier));
+
     return NextResponse.json({
       user: {
         username: user.username,
@@ -106,6 +109,8 @@ export async function GET(
         acceptanceRate,
         totalBytes: solvedProblems.reduce((acc, p) => acc + p.bytes, 0),
         verdictCounts,
+        score: rating.score,
+        userTier: rating.tier,
       },
       solvedProblems,
     });
