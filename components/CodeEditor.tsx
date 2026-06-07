@@ -132,7 +132,12 @@ export default function CodeEditor({ problemId, onAccepted }: CodeEditorProps) {
         )}
         {user && (
           <span className="text-sm text-ink-faint">
-            <span className="font-medium text-ink-soft">{user.username}</span>{" "}
+            <Link
+              href={`/users/${encodeURIComponent(user.username)}`}
+              className="font-medium text-ink-soft hover:text-primary hover:underline"
+            >
+              {user.username}
+            </Link>{" "}
             님으로 제출
           </span>
         )}

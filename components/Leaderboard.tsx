@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { getSupabaseBrowserClient } from "@/lib/supabase";
 import { LeaderboardRow } from "@/lib/types";
 
@@ -115,7 +116,14 @@ export default function Leaderboard({
                     {row.rank}
                   </span>
                 </td>
-                <td className="px-4 py-2.5 text-ink">{row.username}</td>
+                <td className="px-4 py-2.5 text-ink">
+                  <Link
+                    href={`/users/${encodeURIComponent(row.username)}`}
+                    className="hover:text-primary hover:underline"
+                  >
+                    {row.username}
+                  </Link>
+                </td>
                 <td className="px-4 py-2.5 text-right font-mono font-semibold text-primary">
                   {row.bytes}
                 </td>

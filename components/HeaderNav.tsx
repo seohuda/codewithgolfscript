@@ -21,9 +21,12 @@ export default function HeaderNav() {
   if (user) {
     return (
       <div className="flex items-center gap-3 text-sm">
-        <span className="hidden text-ink-soft sm:inline">
+        <Link
+          href={`/users/${encodeURIComponent(user.username)}`}
+          className="hidden text-ink-soft hover:text-primary sm:inline"
+        >
           <span className="font-semibold text-ink">{user.username}</span> 님
-        </span>
+        </Link>
         <button type="button" onClick={handleLogout} className="btn-text">
           로그아웃
         </button>
