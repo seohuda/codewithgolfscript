@@ -61,6 +61,32 @@ export default function AdminUserDetailPage() {
   const [fetching, setFetching] = useState(true);
   const [denied, setDenied] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [resetting, setResetting] = useState(false);
+  const [resetMsg, setResetMsg] = useState<string | null>(null);
+
+  async function sendReset() {
+    setResetting(true);
+    setResetMsg(null);
+    try {
+      const res = await fetch(`/api/admin/users/${id}/reset`, {
+        method: "POST",
+      });
+      const d = await res.json();
+      if (res.ok) {
+        setResetMsg(
+          d.emailSent
+            ? "재설정 메일을 발송했고 잠금을 해제했습니다."
+            : "잠금은 해제했지만 메일 발송에 실패했습니다.",
+        );
+      } else {
+        setResetMsg(d.error ?? "발송에 실패했습니다.");
+      }
+    } catch {
+      setResetMsg("네트워크 오류가 발생했습니다.");
+    } finally {
+      setResetting(false);
+    }
+  }
 
   useEffect(() => {
     if (!loading && (!user || !user.isAdmin)) setDenied(true);
@@ -145,8 +171,20 @@ export default function AdminUserDetailPage() {
             <span>제출 수: {total}</span>
           </div>
           <p className="mt-3 text-[11px] text-ink-faint">
-            이 페이지의 제출 코드 열람은 모니터링 기록에 남습니다.
+            이 페이지의 제출 코드 열람은 모니터링 기록에 남깁니다.
           </p>
+          <div className="mt-3 flex items-center gap-3">
+            <button
+              onClick={sendReset}
+              disabled={resetting || !target.email}
+              className="btn-outlined px-3 py-1.5 text-xs"
+            >
+              {resetting ? "발송 중…" : "비밀번호 재설정 메일 보내기"}
+            </button>
+            {resetMsg && (
+              <span className="text-xs text-ink-soft">{resetMsg}</span>
+            )}
+          </div>
         </div>
       )}
 

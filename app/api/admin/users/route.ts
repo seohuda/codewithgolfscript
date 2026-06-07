@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
 
   if (q) {
     const safe = q.replace(/[\\%_,()*]/g, "").slice(0, 60);
-    if (safe) query = query.ilike("username", `%${safe}%`);
+    if (safe) query = query.or(`username.ilike.%${safe}%,email.ilike.%${safe}%`);
   }
 
   const from = (page - 1) * PAGE_SIZE;
