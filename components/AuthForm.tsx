@@ -14,10 +14,12 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const { setUser } = useAuth();
 
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
 
   const isSignup = mode === "signup";
   const title = isSignup ? "회원가입" : "로그인";
@@ -33,10 +35,13 @@ export default function AuthForm({ mode }: AuthFormProps) {
     setSubmitting(true);
     try {
       const endpoint = isSignup ? "/api/auth/signup" : "/api/auth/login";
+      const payload = isSignup
+        ? { username: username.trim(), email: email.trim(), password }
+        : { username: username.trim(), password };
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: username.trim(), password }),
+        body: JSON.stringify(payload),
       });
       const data = (await res.json()) as { user?: AuthUser; error?: string };
       if (!res.ok || !data.user) {
@@ -44,8 +49,18 @@ export default function AuthForm({ mode }: AuthFormProps) {
         return;
       }
       setUser(data.user);
-      router.push("/problems");
-      router.refresh();
+      if (isSignup) {
+        setNotice(
+          "가입이 완료되었습니다. 인증 메일을 보냈으니 메일함을 확인해 주세요.",
+        );
+        setTimeout(() => {
+          router.push("/problems");
+          router.refresh();
+        }, 1800);
+      } else {
+        router.push("/problems");
+        router.refresh();
+      }
     } catch {
       setError("네트워크 오류가 발생했습니다.");
     } finally {
@@ -79,6 +94,22 @@ export default function AuthForm({ mode }: AuthFormProps) {
             className="field font-mono"
           />
         </div>
+        {isSignup && (
+          <div className="space-y-1.5">
+            <label htmlFor="email" className="text-sm font-medium text-ink">
+              이메일
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+              placeholder="you@example.com"
+              className="field"
+            />
+          </div>
+        )}
         <div className="space-y-1.5">
           <label htmlFor="password" className="text-sm font-medium text-ink">
             비밀번호
@@ -114,6 +145,11 @@ export default function AuthForm({ mode }: AuthFormProps) {
             {error}
           </p>
         )}
+        {notice && (
+          <p className="bg-success/10 px-3 py-2 text-sm text-success">
+            {notice}
+          </p>
+        )}
         <button
           type="submit"
           disabled={submitting}
@@ -121,6 +157,16 @@ export default function AuthForm({ mode }: AuthFormProps) {
         >
           {submitting ? "처리 중…" : cta}
         </button>
+        {!isSignup && (
+          <p className="text-center text-xs">
+            <Link
+              href="/forgot-password"
+              className="text-ink-faint hover:text-accent hover:underline"
+            >
+              비밀번호를 잊으셨나요?
+            </Link>
+          </p>
+        )}
       </form>
 
       <p className="mt-4 text-center text-sm text-ink-soft">

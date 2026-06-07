@@ -4,16 +4,42 @@ import {
   hashPassword,
   validateUsername,
   validatePassword,
+  validateEmail,
+  normalizeEmail,
   createSessionToken,
   SESSION_COOKIE,
   SESSION_COOKIE_OPTIONS,
 } from "@/lib/auth";
+import { generateToken, VERIFY_TOKEN_TTL_MS } from "@/lib/tokens";
+import { sendVerificationEmail, siteUrl } from "@/lib/email";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+// Creates a verification token row and emails the link. Best-effort:
+// failures are logged but do not block account creation.
+async function issueVerification(
+  admin: ReturnType<typeof getSupabaseAdminClient>,
+  userId: string,
+  email: string,
+) {
+  try {
+    const { raw, hash } = generateToken();
+    await admin.from("auth_tokens").insert({
+      user_id: userId,
+      token_hash: hash,
+      type: "verify_email",
+      expires_at: new Date(Date.now() + VERIFY_TOKEN_TTL_MS).toISOString(),
+    });
+    const link = `${siteUrl()}/verify-email?token=${raw}`;
+    await sendVerificationEmail(email, link);
+  } catch (e) {
+    console.error("verification email failed:", e);
+  }
+}
+
 export async function POST(req: NextRequest) {
-  let body: { username?: string; password?: string };
+  let body: { username?: string; password?: string; email?: string };
   try {
     body = await req.json();
   } catch {
@@ -22,16 +48,33 @@ export async function POST(req: NextRequest) {
 
   const username = (body.username ?? "").trim();
   const password = body.password ?? "";
+  const email = normalizeEmail(body.email ?? "");
 
   const userErr = validateUsername(username);
   if (userErr) return NextResponse.json({ error: userErr }, { status: 400 });
+
+  const emailErr = validateEmail(email);
+  if (emailErr) return NextResponse.json({ error: emailErr }, { status: 400 });
 
   const passErr = validatePassword(password);
   if (passErr) return NextResponse.json({ error: passErr }, { status: 400 });
 
   const admin = getSupabaseAdminClient();
 
-  // Check for an existing account (case-insensitive).
+  // Reject if the email is already taken.
+  const { data: emailTaken } = await admin
+    .from("users")
+    .select("id")
+    .ilike("email", email)
+    .maybeSingle();
+  if (emailTaken) {
+    return NextResponse.json(
+      { error: "이미 사용 중인 이메일입니다." },
+      { status: 409 },
+    );
+  }
+
+  // Check for an existing account (case-insensitive username).
   const { data: existing, error: selErr } = await admin
     .from("users")
     .select("id, username, password_hash")
@@ -46,8 +89,7 @@ export async function POST(req: NextRequest) {
   }
 
   if (existing) {
-    // If the username exists but has no password (legacy seed user),
-    // claim it by setting the password. Otherwise reject.
+    // Legacy seed user with no password: claim it.
     if (existing.password_hash) {
       return NextResponse.json(
         { error: "이미 사용 중인 아이디입니다." },
@@ -56,7 +98,11 @@ export async function POST(req: NextRequest) {
     }
     const { error: updErr } = await admin
       .from("users")
-      .update({ password_hash: hashPassword(password) })
+      .update({
+        password_hash: hashPassword(password),
+        email,
+        email_verified: false,
+      })
       .eq("id", existing.id);
 
     if (updErr) {
@@ -65,6 +111,8 @@ export async function POST(req: NextRequest) {
         { status: 500 },
       );
     }
+
+    await issueVerification(admin, existing.id as string, email);
 
     const token = createSessionToken({
       userId: existing.id as string,
@@ -80,15 +128,19 @@ export async function POST(req: NextRequest) {
   // Create a brand-new user.
   const { data: created, error: insErr } = await admin
     .from("users")
-    .insert({ username, password_hash: hashPassword(password) })
+    .insert({
+      username,
+      password_hash: hashPassword(password),
+      email,
+      email_verified: false,
+    })
     .select("id, username")
     .single();
 
   if (insErr || !created) {
-    // Unique violation safety net.
     if (insErr?.code === "23505") {
       return NextResponse.json(
-        { error: "이미 사용 중인 아이디입니다." },
+        { error: "이미 사용 중인 아이디 또는 이메일입니다." },
         { status: 409 },
       );
     }
@@ -97,6 +149,8 @@ export async function POST(req: NextRequest) {
       { status: 500 },
     );
   }
+
+  await issueVerification(admin, created.id as string, email);
 
   const token = createSessionToken({
     userId: created.id as string,

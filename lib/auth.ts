@@ -124,3 +124,16 @@ export function validatePassword(password: string): string | null {
   if (password.length > 200) return "비밀번호가 너무 깁니다.";
   return null;
 }
+
+export function validateEmail(email: string): string | null {
+  if (!email) return "이메일을 입력해 주세요.";
+  if (email.length > 254) return "이메일이 너무 깁니다.";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return "올바른 이메일 형식이 아닙니다.";
+  }
+  return null;
+}
+
+export function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase();
+}

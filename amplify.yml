@@ -9,7 +9,7 @@ frontend:
         # Bake the runtime env vars into .env.production so the Next.js
         # server (Amplify SSR Lambda) can read them at runtime. Amplify
         # exposes console-defined variables to the build shell only.
-        - env | grep -E '^(NEXT_PUBLIC_SUPABASE_URL|NEXT_PUBLIC_SUPABASE_ANON_KEY|SUPABASE_SERVICE_ROLE_KEY|SESSION_SECRET|PISTON_API_URL)=' >> .env.production
+        - env | grep -E '^(NEXT_PUBLIC_SUPABASE_URL|NEXT_PUBLIC_SUPABASE_ANON_KEY|SUPABASE_SERVICE_ROLE_KEY|SESSION_SECRET|PISTON_API_URL|NEXT_PUBLIC_SITE_URL|SES_REGION|SES_ACCESS_KEY_ID|SES_SECRET_ACCESS_KEY|SES_FROM_EMAIL)=' >> .env.production
         - npm run build
   artifacts:
     baseDirectory: .next
