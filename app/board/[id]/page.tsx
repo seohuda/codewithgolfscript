@@ -117,7 +117,8 @@ export default function PostDetailPage() {
     }
   }
 
-  const canModify = !!user && !!post && user.id === post.user_id;
+  const canModify =
+    !!user && !!post && (user.id === post.user_id || !!user.isAdmin);
 
   function startEdit(c: Comment) {
     setEditingId(c.id);
@@ -238,7 +239,7 @@ export default function PostDetailPage() {
         {comments.length > 0 && (
           <div className="card divide-y divide-surface-border">
             {comments.map((c) => {
-              const mine = !!user && user.id === c.user_id;
+              const mine = !!user && (user.id === c.user_id || !!user.isAdmin);
               const editing = editingId === c.id;
               return (
                 <div key={c.id} className="p-4">
