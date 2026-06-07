@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
 import { Problem } from "@/lib/types";
+import { getTierInfo } from "@/lib/tiers";
 import ProblemWorkspace from "@/components/ProblemWorkspace";
 import TierBadge from "@/components/TierBadge";
 import ProblemStatusBadge from "@/components/ProblemStatusBadge";
@@ -24,6 +26,43 @@ async function fetchProblem(id: number): Promise<Problem | null> {
   } catch {
     return null;
   }
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { id: string };
+}): Promise<Metadata> {
+  const id = Number(params.id);
+  if (!Number.isFinite(id) || id <= 0) {
+    return { title: "문제를 찾을 수 없습니다" };
+  }
+  const problem = await fetchProblem(id);
+  if (!problem) {
+    return { title: "문제를 찾을 수 없습니다" };
+  }
+
+  const tierName = getTierInfo(problem.tier ?? 0).nameKo;
+  const desc = (problem.description ?? "").slice(0, 150);
+  const tags = (problem.tags ?? []).join(", ");
+  const summary =
+    `[${tierName}] ${desc}` + (tags ? ` · 태그: ${tags}` : "");
+
+  return {
+    title: problem.title,
+    description: summary,
+    openGraph: {
+      title: `${problem.title} · CODE WITH GOLFSCRIPT`,
+      description: summary,
+      type: "article",
+      url: `/problems/${problem.id}`,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${problem.title} · CODE WITH GOLFSCRIPT`,
+      description: summary,
+    },
+  };
 }
 
 export default async function ProblemPage({

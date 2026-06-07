@@ -6,10 +6,43 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import ThemeToggle from "@/components/ThemeToggle";
 import HeaderNav from "@/components/HeaderNav";
 
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
+  "https://www.golfscript.xyz";
+
 export const metadata: Metadata = {
-  title: "CODE WITH GOLFSCRIPT",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "CODE WITH GOLFSCRIPT",
+    template: "%s · CODE WITH GOLFSCRIPT",
+  },
   description:
     "GolfScript 전용 숏코딩 채점 사이트. 가장 적은 바이트로 푸는 사람이 승리합니다.",
+  applicationName: "CODE WITH GOLFSCRIPT",
+  keywords: [
+    "GolfScript",
+    "코드 골프",
+    "code golf",
+    "숏코딩",
+    "온라인 저지",
+    "알고리즘",
+    "PS",
+  ],
+  openGraph: {
+    type: "website",
+    siteName: "CODE WITH GOLFSCRIPT",
+    title: "CODE WITH GOLFSCRIPT",
+    description:
+      "GolfScript 전용 숏코딩 채점 사이트. 가장 적은 바이트로 푸는 사람이 승리합니다.",
+    url: SITE_URL,
+    locale: "ko_KR",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "CODE WITH GOLFSCRIPT",
+    description:
+      "GolfScript 전용 숏코딩 채점 사이트. 가장 적은 바이트로 푸는 사람이 승리합니다.",
+  },
 };
 
 // Prevents a flash of the wrong theme before hydration.
