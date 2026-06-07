@@ -1,28 +1,13 @@
-import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
-
 /**
- * AWS SES email sender (server-only).
+ * Resend email sender (server-only).
+ *
+ * Uses the Resend REST API directly (no SDK needed).
  *
  * Required env vars:
- *  - SES_REGION                (e.g. ap-northeast-2)
- *  - SES_ACCESS_KEY_ID
- *  - SES_SECRET_ACCESS_KEY
- *  - SES_FROM_EMAIL            verified sender address/domain in SES
- *  - NEXT_PUBLIC_SITE_URL      base URL for links (e.g. https://...amplifyapp.com)
+ *  - RESEND_API_KEY            API key from resend.com
+ *  - EMAIL_FROM                verified sender, e.g. "CODE WITH GOLFSCRIPT <no-reply@golfscript.xyz>"
+ *  - NEXT_PUBLIC_SITE_URL      base URL for links (e.g. https://www.golfscript.xyz)
  */
-
-function getClient(): SESClient {
-  const region = process.env.SES_REGION;
-  const accessKeyId = process.env.SES_ACCESS_KEY_ID;
-  const secretAccessKey = process.env.SES_SECRET_ACCESS_KEY;
-  if (!region || !accessKeyId || !secretAccessKey) {
-    throw new Error("AWS SES credentials are not configured.");
-  }
-  return new SESClient({
-    region,
-    credentials: { accessKeyId, secretAccessKey },
-  });
-}
 
 export function siteUrl(): string {
   return (
@@ -32,23 +17,25 @@ export function siteUrl(): string {
 }
 
 async function sendEmail(to: string, subject: string, html: string, text: string) {
-  const from = process.env.SES_FROM_EMAIL;
-  if (!from) throw new Error("SES_FROM_EMAIL is not configured.");
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.EMAIL_FROM;
+  if (!apiKey || !from) {
+    throw new Error("RESEND_API_KEY or EMAIL_FROM is not configured.");
+  }
 
-  const client = getClient();
-  await client.send(
-    new SendEmailCommand({
-      Source: from,
-      Destination: { ToAddresses: [to] },
-      Message: {
-        Subject: { Data: subject, Charset: "UTF-8" },
-        Body: {
-          Html: { Data: html, Charset: "UTF-8" },
-          Text: { Data: text, Charset: "UTF-8" },
-        },
-      },
-    }),
-  );
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ from, to, subject, html, text }),
+  });
+
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    throw new Error(`Resend send failed (${res.status}): ${detail}`);
+  }
 }
 
 function layout(title: string, bodyHtml: string): string {
