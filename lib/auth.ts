@@ -39,11 +39,18 @@ export const SESSION_COOKIE = "gs_session";
 const SESSION_MAX_AGE_SEC = 60 * 60 * 24 * 30; // 30 days
 
 function sessionSecret(): string {
-  return (
-    process.env.SESSION_SECRET ||
-    process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    "dev-insecure-secret-change-me"
-  );
+  const secret = process.env.SESSION_SECRET;
+  if (secret && secret.length >= 16) return secret;
+
+  // In production a dedicated, sufficiently long secret is mandatory.
+  // Falling back to a shared/guessable value would let anyone forge
+  // session tokens.
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      "SESSION_SECRET is not set (or too short). Refusing to sign sessions with an insecure fallback in production.",
+    );
+  }
+  return "dev-insecure-secret-change-me";
 }
 
 function sign(payload: string): string {
