@@ -6,9 +6,6 @@ import {
   validatePassword,
   validateEmail,
   normalizeEmail,
-  createSessionToken,
-  SESSION_COOKIE,
-  SESSION_COOKIE_OPTIONS,
 } from "@/lib/auth";
 import { generateToken, VERIFY_TOKEN_TTL_MS } from "@/lib/tokens";
 import { sendVerificationEmail, siteUrl } from "@/lib/email";
@@ -114,15 +111,11 @@ export async function POST(req: NextRequest) {
 
     await issueVerification(admin, existing.id as string, email);
 
-    const token = createSessionToken({
-      userId: existing.id as string,
-      username: existing.username as string,
+    return NextResponse.json({
+      ok: true,
+      verificationRequired: true,
+      email,
     });
-    const res = NextResponse.json({
-      user: { id: existing.id, username: existing.username },
-    });
-    res.cookies.set(SESSION_COOKIE, token, SESSION_COOKIE_OPTIONS);
-    return res;
   }
 
   // Create a brand-new user.
@@ -152,13 +145,9 @@ export async function POST(req: NextRequest) {
 
   await issueVerification(admin, created.id as string, email);
 
-  const token = createSessionToken({
-    userId: created.id as string,
-    username: created.username as string,
+  return NextResponse.json({
+    ok: true,
+    verificationRequired: true,
+    email,
   });
-  const res = NextResponse.json({
-    user: { id: created.id, username: created.username },
-  });
-  res.cookies.set(SESSION_COOKIE, token, SESSION_COOKIE_OPTIONS);
-  return res;
 }

@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
 
   const { data: user, error } = await admin
     .from("users")
-    .select("id, username, password_hash, is_admin")
+    .select("id, username, password_hash, is_admin, email_verified")
     .ilike("username", username)
     .maybeSingle();
 
@@ -51,6 +51,17 @@ export async function POST(req: NextRequest) {
 
   if (!user || !user.password_hash) return invalid;
   if (!verifyPassword(password, user.password_hash as string)) return invalid;
+
+  // Email verification is required before logging in.
+  if (!user.email_verified) {
+    return NextResponse.json(
+      {
+        error: "이메일 인증이 필요합니다. 가입 시 받은 인증 메일을 확인해 주세요.",
+        verificationRequired: true,
+      },
+      { status: 403 },
+    );
+  }
 
   const token = createSessionToken({
     userId: user.id as string,

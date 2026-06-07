@@ -20,14 +20,34 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const [showResend, setShowResend] = useState(false);
 
   const isSignup = mode === "signup";
   const title = isSignup ? "회원가입" : "로그인";
   const cta = isSignup ? "계정 만들기" : "로그인";
 
+  async function handleResend() {
+    setError(null);
+    setNotice(null);
+    try {
+      const res = await fetch("/api/auth/resend-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: username.trim(), password }),
+      });
+      const d = await res.json();
+      setNotice(d.message ?? "인증 메일을 다시 보냈습니다.");
+      setShowResend(false);
+    } catch {
+      setError("네트워크 오류가 발생했습니다.");
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setNotice(null);
+    setShowResend(false);
     if (isSignup && password !== confirm) {
       setError("비밀번호가 일치하지 않습니다.");
       return;
@@ -43,24 +63,36 @@ export default function AuthForm({ mode }: AuthFormProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      const data = (await res.json()) as { user?: AuthUser; error?: string };
+      const data = (await res.json()) as {
+        user?: AuthUser;
+        error?: string;
+        verificationRequired?: boolean;
+      };
+
+      if (isSignup) {
+        // Signup no longer logs the user in; it requires email verification.
+        if (!res.ok) {
+          setError(data.error ?? "요청을 처리하지 못했습니다.");
+          return;
+        }
+        setNotice(
+          "가입이 거의 완료되었습니다! 보내드린 인증 메일의 링크를 눌러 이메일 인증을 마치면 로그인할 수 있습니다. (스팸함도 확인해 주세요)",
+        );
+        setUsername("");
+        setEmail("");
+        setPassword("");
+        setConfirm("");
+        return;
+      }
+
       if (!res.ok || !data.user) {
         setError(data.error ?? "요청을 처리하지 못했습니다.");
+        if (data.verificationRequired) setShowResend(true);
         return;
       }
       setUser(data.user);
-      if (isSignup) {
-        setNotice(
-          "가입이 완료되었습니다. 인증 메일을 보냈으니 메일함을 확인해 주세요.",
-        );
-        setTimeout(() => {
-          router.push("/problems");
-          router.refresh();
-        }, 1800);
-      } else {
-        router.push("/problems");
-        router.refresh();
-      }
+      router.push("/problems");
+      router.refresh();
     } catch {
       setError("네트워크 오류가 발생했습니다.");
     } finally {
@@ -144,6 +176,15 @@ export default function AuthForm({ mode }: AuthFormProps) {
           <p className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">
             {error}
           </p>
+        )}
+        {showResend && (
+          <button
+            type="button"
+            onClick={handleResend}
+            className="btn-outlined w-full text-sm"
+          >
+            인증 메일 다시 보내기
+          </button>
         )}
         {notice && (
           <p className="bg-success/10 px-3 py-2 text-sm text-success">

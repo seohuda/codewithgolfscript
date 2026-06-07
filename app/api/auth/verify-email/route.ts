@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
 import { hashToken } from "@/lib/tokens";
+import {
+  createSessionToken,
+  SESSION_COOKIE,
+  SESSION_COOKIE_OPTIONS,
+} from "@/lib/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -42,5 +47,23 @@ export async function POST(req: NextRequest) {
     .eq("id", row.user_id);
   await admin.from("auth_tokens").update({ used: true }).eq("id", row.id);
 
-  return NextResponse.json({ ok: true });
+  // Log the user in immediately after a successful verification.
+  const { data: u } = await admin
+    .from("users")
+    .select("id, username")
+    .eq("id", row.user_id)
+    .maybeSingle();
+
+  const res = NextResponse.json({
+    ok: true,
+    user: u ? { id: u.id, username: u.username } : undefined,
+  });
+  if (u) {
+    const token = createSessionToken({
+      userId: u.id as string,
+      username: u.username as string,
+    });
+    res.cookies.set(SESSION_COOKIE, token, SESSION_COOKIE_OPTIONS);
+  }
+  return res;
 }

@@ -2,10 +2,13 @@
 
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useAuth } from "@/components/AuthProvider";
 
 function VerifyInner() {
   const params = useSearchParams();
+  const router = useRouter();
+  const { setUser } = useAuth();
   const token = params.get("token") ?? "";
   const [status, setStatus] = useState<"loading" | "ok" | "fail">("loading");
   const [message, setMessage] = useState("");
@@ -28,6 +31,11 @@ function VerifyInner() {
         if (cancelled) return;
         if (res.ok) {
           setStatus("ok");
+          if (d.user) setUser(d.user);
+          setTimeout(() => {
+            router.push("/problems");
+            router.refresh();
+          }, 1500);
         } else {
           setStatus("fail");
           setMessage(d.error ?? "인증에 실패했습니다.");
@@ -43,6 +51,7 @@ function VerifyInner() {
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   return (
@@ -53,10 +62,10 @@ function VerifyInner() {
       {status === "ok" && (
         <>
           <p className="text-sm font-semibold text-success">
-            이메일 인증이 완료되었습니다.
+            이메일 인증이 완료되었습니다. 자동으로 로그인됩니다…
           </p>
-          <Link href="/" className="btn-filled mt-6 inline-flex">
-            홈으로
+          <Link href="/problems" className="btn-filled mt-6 inline-flex">
+            문제 풀러 가기
           </Link>
         </>
       )}
