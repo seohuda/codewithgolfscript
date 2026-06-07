@@ -2,14 +2,17 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 
 interface Post {
   id: number;
+  user_id: string;
   author: string;
+  author_is_admin: boolean;
   title: string;
   body: string;
+  is_notice: boolean;
   created_at: string;
   comment_count: number;
 }
@@ -37,6 +40,7 @@ function formatTime(iso: string): string {
 
 export default function PostDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const { user } = useAuth();
 
@@ -46,6 +50,7 @@ export default function PostDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [comment, setComment] = useState("");
   const [posting, setPosting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -91,6 +96,25 @@ export default function PostDetailPage() {
     }
   }
 
+  async function handleDelete() {
+    if (!confirm("정말 이 글을 삭제하시겠습니까?")) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/board/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        router.push("/board");
+        router.refresh();
+      } else {
+        const d = await res.json();
+        alert(d.error ?? "삭제에 실패했습니다.");
+      }
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  const canModify = !!user && !!post && user.id === post.user_id;
+
   if (loading) {
     return (
       <div className="card p-10 text-center text-sm text-ink-faint">
@@ -123,9 +147,44 @@ export default function PostDetailPage() {
       </div>
 
       <article className="card p-6">
-        <h1 className="text-xl font-bold text-ink">{post.title}</h1>
+        <div className="flex items-start justify-between gap-4">
+          <h1 className="text-xl font-bold text-ink">
+            {post.is_notice && (
+              <span className="mr-2 rounded bg-primary px-1.5 py-0.5 align-middle text-[11px] font-bold text-white">
+                공지
+              </span>
+            )}
+            {post.title}
+          </h1>
+          {canModify && (
+            <div className="flex shrink-0 gap-2">
+              <Link
+                href={`/board/${post.id}/edit`}
+                className="rounded-md border border-surface-border px-3 py-1.5 text-xs font-medium text-ink-soft transition-colors hover:bg-surface-variant"
+              >
+                수정
+              </Link>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="rounded-md border border-danger/30 px-3 py-1.5 text-xs font-medium text-danger transition-colors hover:bg-danger/10 disabled:opacity-50"
+              >
+                {deleting ? "삭제 중…" : "삭제"}
+              </button>
+            </div>
+          )}
+        </div>
         <div className="mt-2 flex items-center gap-3 text-xs text-ink-faint">
-          <span className="font-medium text-ink-soft">{post.author}</span>
+          <span
+            className={
+              post.author_is_admin
+                ? "font-semibold text-primary"
+                : "font-medium text-ink-soft"
+            }
+          >
+            {post.author}
+            {post.author_is_admin && " (관리자)"}
+          </span>
           <span>{formatTime(post.created_at)}</span>
         </div>
         <div className="mt-5 whitespace-pre-wrap text-sm leading-relaxed text-ink">
