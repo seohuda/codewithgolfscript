@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
 import { requireAdmin } from "@/lib/adminAuth";
 import { runGolfScript } from "@/lib/golfscript";
+import { sanitizeUrl } from "@/lib/url";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -125,7 +126,7 @@ export async function PATCH(
       step_order: Number(body.step_order) || 0,
       sample_input: String(body.sample_input ?? ""),
       sample_output: String(body.sample_output ?? ""),
-      image_url: String(body.image_url ?? ""),
+      image_url: sanitizeUrl(body.image_url),
       tags: cleanTags(body.tags),
     })
     .eq("id", id);

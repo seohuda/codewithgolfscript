@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
 import { Problem } from "@/lib/types";
 import { getTierInfo } from "@/lib/tiers";
+import { sanitizeUrl } from "@/lib/url";
 import ProblemWorkspace from "@/components/ProblemWorkspace";
 import TierBadge from "@/components/TierBadge";
 import ProblemStatusBadge from "@/components/ProblemStatusBadge";
@@ -124,10 +125,10 @@ export default async function ProblemPage({
             <p className="whitespace-pre-wrap text-sm leading-relaxed text-ink-soft">
               {problem.description}
             </p>
-            {problem.image_url && (
+            {problem.image_url && sanitizeUrl(problem.image_url) && (
               /* eslint-disable-next-line @next/next/no-img-element */
               <img
-                src={problem.image_url}
+                src={sanitizeUrl(problem.image_url)}
                 alt={`${problem.title} 이미지`}
                 className="mt-4 max-w-full border border-surface-border"
               />
