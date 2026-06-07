@@ -94,12 +94,40 @@ export async function POST(req: NextRequest) {
 
   // --- Rate limiting: block abusive rapid submissions -----------------
   {
-    // Existing ban still active?
+    // Existing ban still active? Also confirm the account is verified.
     const { data: u } = await admin
       .from("users")
-      .select("banned_until")
+      .select("banned_until, email_verified")
       .eq("id", session.userId)
       .maybeSingle();
+    if (!u) {
+      return NextResponse.json<SubmitResponse>(
+        {
+          submissionId: null,
+          verdict: "RE",
+          bytes: 0,
+          passed: 0,
+          total: 0,
+          results: [],
+          message: "로그인이 필요합니다.",
+        },
+        { status: 401 },
+      );
+    }
+    if (!u.email_verified) {
+      return NextResponse.json<SubmitResponse>(
+        {
+          submissionId: null,
+          verdict: "RE",
+          bytes: 0,
+          passed: 0,
+          total: 0,
+          results: [],
+          message: "이메일 인증 후 제출할 수 있습니다.",
+        },
+        { status: 403 },
+      );
+    }
     if (u?.banned_until && new Date(u.banned_until) > new Date()) {
       const mins = Math.ceil(
         (new Date(u.banned_until).getTime() - Date.now()) / 60000,
