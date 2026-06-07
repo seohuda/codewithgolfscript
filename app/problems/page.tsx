@@ -292,7 +292,13 @@ export default function ProblemsPage() {
                   <td className="px-4 py-3">
                     <Link
                       href={`/problems/${p.id}`}
-                      className="font-medium text-primary hover:underline"
+                      className={`font-medium hover:underline ${
+                        user && statusOf(p.id) === "solved"
+                          ? "text-success"
+                          : user && statusOf(p.id) === "tried"
+                            ? "text-danger"
+                            : "text-primary"
+                      }`}
                     >
                       {p.title}
                     </Link>

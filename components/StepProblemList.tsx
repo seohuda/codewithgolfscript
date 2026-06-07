@@ -38,7 +38,17 @@ export default function StepProblemList({
             >
               <span className="font-mono text-xs text-ink-faint">{i + 1}</span>
               <TierBadge tier={p.tier} size="sm" />
-              <span className="font-medium text-ink">{p.title}</span>
+              <span
+                className={`font-medium ${
+                  isSolved
+                    ? "text-success"
+                    : isTried
+                      ? "text-danger"
+                      : "text-ink"
+                }`}
+              >
+                {p.title}
+              </span>
               {isSolved && (
                 <span className="text-success" title="맞은 문제">
                   ✓
