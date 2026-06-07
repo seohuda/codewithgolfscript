@@ -1,12 +1,14 @@
 "use client";
 
+import { kstDayKey } from "@/lib/date";
+
 interface ActivityGraphProps {
   activity: Record<string, number>; // "YYYY-MM-DD" -> count
   weeks?: number;
 }
 
 function dayKey(d: Date): string {
-  return d.toISOString().slice(0, 10);
+  return kstDayKey(d);
 }
 
 function levelColor(count: number): string {

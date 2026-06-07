@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
 import { rateUser } from "@/lib/score";
 import { computeBadges } from "@/lib/badges";
+import { kstDayKey } from "@/lib/date";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -80,11 +81,11 @@ export async function GET(
     }
 
     // Daily submission counts for the last ~17 weeks (activity graph).
+    // Bucketed by KST so the graph and streaks line up with the user's
+    // local day.
     const dayCounts: Record<string, number> = {};
     for (const s of submissions) {
-      const day = new Date(s.created_at as string)
-        .toISOString()
-        .slice(0, 10);
+      const day = kstDayKey(s.created_at as string);
       dayCounts[day] = (dayCounts[day] ?? 0) + 1;
     }
 
