@@ -21,6 +21,14 @@ export default function HeaderNav() {
   if (user) {
     return (
       <div className="flex items-center gap-3 text-sm">
+        {user.isAdmin && (
+          <Link
+            href="/admin"
+            className="btn-text hidden text-accent sm:inline-flex"
+          >
+            관리자
+          </Link>
+        )}
         <Link href="/me/submissions" className="btn-text hidden sm:inline-flex">
           내 제출
         </Link>
