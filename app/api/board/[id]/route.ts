@@ -34,7 +34,7 @@ export async function GET(
 
     const { data: comments } = await admin
       .from("board_comments")
-      .select("id, author, body, created_at")
+      .select("id, user_id, author, author_is_admin, body, created_at")
       .eq("post_id", postId)
       .order("created_at", { ascending: true });
 

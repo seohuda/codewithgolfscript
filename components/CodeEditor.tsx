@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import Link from "next/link";
 import { SubmitResponse, Verdict } from "@/lib/types";
 import { useAuth } from "./AuthProvider";
+import { clearSolvedCache } from "./useSolved";
 
 interface CodeEditorProps {
   problemId: number;
@@ -18,12 +19,12 @@ const VERDICT_META: Record<
   Verdict,
   { label: string; color: string; bg: string }
 > = {
-  AC: { label: "정답", color: "#188038", bg: "#e6f4ea" },
-  WA: { label: "오답", color: "#d93025", bg: "#fce8e6" },
-  TLE: { label: "시간 초과", color: "#e37400", bg: "#fef7e0" },
-  RE: { label: "런타임 에러", color: "#d93025", bg: "#fce8e6" },
-  CE: { label: "컴파일 에러", color: "#d93025", bg: "#fce8e6" },
-  PENDING: { label: "대기 중", color: "#5f6368", bg: "#f1f3f4" },
+  AC: { label: "정답", color: "rgb(var(--success))", bg: "rgb(var(--success) / 0.14)" },
+  WA: { label: "오답", color: "rgb(var(--danger))", bg: "rgb(var(--danger) / 0.14)" },
+  TLE: { label: "시간 초과", color: "rgb(var(--warning))", bg: "rgb(var(--warning) / 0.14)" },
+  RE: { label: "런타임 에러", color: "rgb(var(--danger))", bg: "rgb(var(--danger) / 0.14)" },
+  CE: { label: "컴파일 에러", color: "rgb(var(--danger))", bg: "rgb(var(--danger) / 0.14)" },
+  PENDING: { label: "대기 중", color: "rgb(var(--ink-soft))", bg: "rgb(var(--surface-variant))" },
 };
 
 export default function CodeEditor({ problemId, onAccepted }: CodeEditorProps) {
@@ -32,6 +33,10 @@ export default function CodeEditor({ problemId, onAccepted }: CodeEditorProps) {
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<SubmitResponse | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const taRef = useRef<HTMLTextAreaElement>(null);
+  const gutterRef = useRef<HTMLDivElement>(null);
+
+  const lineCount = useMemo(() => code.split("\n").length, [code]);
 
   const bytes = useMemo(() => utf8Bytes(code), [code]);
 
@@ -55,7 +60,10 @@ export default function CodeEditor({ problemId, onAccepted }: CodeEditorProps) {
       });
       const data = (await res.json()) as SubmitResponse;
       setResult(data);
-      if (res.ok && data.verdict === "AC") onAccepted?.();
+      if (res.ok && data.verdict === "AC") {
+        clearSolvedCache();
+        onAccepted?.();
+      }
       if (!res.ok && data.message) setErrorMsg(data.message);
     } catch (e) {
       setErrorMsg(e instanceof Error ? e.message : "제출에 실패했습니다.");
@@ -90,17 +98,33 @@ export default function CodeEditor({ problemId, onAccepted }: CodeEditorProps) {
           <span className="font-mono text-xs text-ink-soft">main.gs</span>
           <span className="text-xs font-medium text-ink-faint">GolfScript</span>
         </div>
-        <textarea
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          onKeyDown={handleKeyDown}
-          spellCheck={false}
-          autoComplete="off"
-          autoCorrect="off"
-          autoCapitalize="off"
-          placeholder={"# 여기에 GolfScript 코드를 입력하세요\n~"}
-          className="golf-editor h-72 w-full resize-none bg-surface px-4 py-3 text-sm text-ink outline-none"
-        />
+        <div className="flex">
+          <div
+            ref={gutterRef}
+            aria-hidden
+            className="golf-editor max-h-72 min-h-72 select-none overflow-hidden border-r border-surface-border bg-surface-dim px-2 py-3 text-right text-sm text-ink-faint"
+          >
+            {Array.from({ length: lineCount }, (_, i) => (
+              <div key={i}>{i + 1}</div>
+            ))}
+          </div>
+          <textarea
+            ref={taRef}
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onScroll={(e) => {
+              if (gutterRef.current)
+                gutterRef.current.scrollTop = e.currentTarget.scrollTop;
+            }}
+            spellCheck={false}
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            placeholder={"# 여기에 GolfScript 코드를 입력하세요\n~"}
+            className="golf-editor h-72 w-full resize-none bg-surface px-4 py-3 text-sm text-ink outline-none"
+          />
+        </div>
         <div className="flex items-center justify-between border-t border-surface-border bg-surface-dim px-4 py-2.5">
           <span className="font-mono text-xs text-ink-faint">
             {code.length}자
@@ -146,8 +170,8 @@ export default function CodeEditor({ problemId, onAccepted }: CodeEditorProps) {
 
       {result && meta && (
         <div
-          className="animate-fade-in rounded-xl border p-4"
-          style={{ borderColor: meta.color + "40", background: meta.bg }}
+          className="animate-fade-in rounded-xl border border-surface-border p-4"
+          style={{ background: meta.bg }}
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -180,18 +204,43 @@ export default function CodeEditor({ problemId, onAccepted }: CodeEditorProps) {
                   <span
                     key={c.index}
                     title={`${c.hidden ? "히든" : "공개"} 케이스 #${c.index + 1}: ${cm.label}`}
-                    className="rounded-md border px-2 py-1 font-mono text-[11px]"
-                    style={{
-                      borderColor: cm.color + "40",
-                      color: cm.color,
-                      background: "#ffffff",
-                    }}
+                    className="rounded-md border border-surface-border bg-surface px-2 py-1 font-mono text-[11px]"
+                    style={{ color: cm.color }}
                   >
                     {c.hidden ? "H" : "S"}
                     {c.index + 1} {c.verdict}
                   </span>
                 );
               })}
+            </div>
+          )}
+          {result.verdict === "AC" && (
+            <div className="mt-3 border-t border-surface-border/60 pt-3 text-sm">
+              {result.isRecord ? (
+                <span className="font-semibold text-success">
+                  🎉 최단 기록 달성! 현재 1위 {result.bytes}바이트입니다.
+                </span>
+              ) : (
+                <span className="text-ink-soft">
+                  내 코드{" "}
+                  <span className="font-mono font-semibold text-ink">
+                    {result.bytes}
+                  </span>
+                  바이트 · 현재 최단{" "}
+                  <span className="font-mono font-semibold text-primary">
+                    {result.bestBytes}
+                  </span>
+                  바이트
+                  {result.bestBytes != null &&
+                    result.bytes > result.bestBytes && (
+                      <span className="text-ink-faint">
+                        {" "}
+                        ({result.bytes - result.bestBytes}바이트 더 줄이면
+                        1위!)
+                      </span>
+                    )}
+                </span>
+              )}
             </div>
           )}
         </div>

@@ -1,6 +1,5 @@
-import Link from "next/link";
 import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
-import TierBadge from "@/components/TierBadge";
+import StepProblemList from "@/components/StepProblemList";
 import { STEP_GROUPS } from "@/scripts/problems.steps";
 
 export const dynamic = "force-dynamic";
@@ -81,22 +80,13 @@ export default async function StepsPage() {
                     {list.length}문제
                   </span>
                 </div>
-                <ul className="flex flex-wrap gap-2 p-4">
-                  {list.map((p, i) => (
-                    <li key={p.id}>
-                      <Link
-                        href={`/problems/${p.id}`}
-                        className="flex items-center gap-2 rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm transition-colors hover:border-primary hover:bg-primary-container/30"
-                      >
-                        <span className="font-mono text-xs text-ink-faint">
-                          {i + 1}
-                        </span>
-                        <TierBadge tier={p.tier} size="sm" />
-                        <span className="font-medium text-ink">{p.title}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+                <StepProblemList
+                  problems={list.map((p) => ({
+                    id: p.id,
+                    title: p.title,
+                    tier: p.tier,
+                  }))}
+                />
               </section>
             );
           })}

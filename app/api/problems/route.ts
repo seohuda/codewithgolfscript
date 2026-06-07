@@ -6,12 +6,13 @@ export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 20;
 
-// GET /api/problems?q=...&tier=...&sort=tier|id&page=1
+// GET /api/problems?q=&tierMin=&tierMax=&group=&sort=tier|id&page=1
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const q = (searchParams.get("q") ?? "").trim();
   const tierMin = searchParams.get("tierMin");
   const tierMax = searchParams.get("tierMax");
+  const group = (searchParams.get("group") ?? "").trim();
   const sort = searchParams.get("sort") === "id" ? "id" : "tier";
   const page = Math.max(1, Number(searchParams.get("page") ?? "1") || 1);
 
@@ -22,6 +23,7 @@ export async function GET(req: NextRequest) {
       .select("id, title, tier, source, step_group", { count: "exact" });
 
     if (q) query = query.ilike("title", `%${q}%`);
+    if (group) query = query.eq("step_group", group);
     if (tierMin !== null && tierMin !== "") {
       const t = Number(tierMin);
       if (Number.isFinite(t)) query = query.gte("tier", t);
@@ -51,8 +53,41 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    // Per-problem stats (solved-people count + acceptance rate) for the page.
+    const ids = (data ?? []).map((p) => p.id as number);
+    const statMap = new Map<
+      number,
+      { solvers: Set<string>; ac: number; total: number }
+    >();
+    if (ids.length > 0) {
+      const { data: subs } = await admin
+        .from("submissions")
+        .select("problem_id, user_id, verdict")
+        .in("problem_id", ids)
+        .range(0, 99999);
+      for (const s of subs ?? []) {
+        const pid = s.problem_id as number;
+        if (!statMap.has(pid))
+          statMap.set(pid, { solvers: new Set(), ac: 0, total: 0 });
+        const st = statMap.get(pid)!;
+        st.total += 1;
+        if (s.verdict === "AC") {
+          st.ac += 1;
+          st.solvers.add(s.user_id as string);
+        }
+      }
+    }
+
+    const problems = (data ?? []).map((p) => {
+      const st = statMap.get(p.id as number);
+      const solvedCount = st ? st.solvers.size : 0;
+      const acRate =
+        st && st.total > 0 ? Math.round((st.ac / st.total) * 1000) / 10 : 0;
+      return { ...p, solvedCount, acRate };
+    });
+
     return NextResponse.json({
-      problems: data ?? [],
+      problems,
       total: count ?? 0,
       page,
       pageSize: PAGE_SIZE,

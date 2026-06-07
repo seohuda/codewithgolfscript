@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import TierBadge from "@/components/TierBadge";
+import ActivityGraph from "@/components/ActivityGraph";
 import { getTierInfo } from "@/lib/tiers";
 
 interface SolvedProblem {
@@ -26,6 +27,7 @@ interface ProfileData {
     userTier: number;
   };
   solvedProblems: SolvedProblem[];
+  activity: Record<string, number>;
 }
 
 const VERDICT_LABEL: Record<string, string> = {
@@ -171,6 +173,9 @@ export default function ProfilePage() {
           </p>
         </div>
       </section>
+
+      {/* Activity graph */}
+      <ActivityGraph activity={data.activity ?? {}} />
 
       {/* Verdict breakdown */}
       {stats.totalSubmissions > 0 && (

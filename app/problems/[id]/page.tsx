@@ -4,6 +4,7 @@ import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
 import { Problem } from "@/lib/types";
 import ProblemWorkspace from "@/components/ProblemWorkspace";
 import TierBadge from "@/components/TierBadge";
+import ProblemStatusBadge from "@/components/ProblemStatusBadge";
 
 export const dynamic = "force-dynamic";
 
@@ -52,6 +53,7 @@ export default async function ProblemPage({
       <div className="flex flex-wrap items-center gap-3">
         <TierBadge tier={problem.tier ?? 0} showName />
         <h1 className="text-2xl font-bold text-ink">{problem.title}</h1>
+        <ProblemStatusBadge problemId={problem.id} />
       </div>
 
       {problem.source && !problem.source.startsWith("자체 제작") && (

@@ -225,6 +225,35 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // --- Compute best-bytes record for AC submissions ------------------
+  let bestBytes: number | null = null;
+  let isRecord = false;
+  if (finalVerdict === "AC") {
+    const { data: best } = await admin
+      .from("submissions")
+      .select("bytes")
+      .eq("problem_id", problemId)
+      .eq("verdict", "AC")
+      .order("bytes", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    bestBytes = (best?.bytes as number) ?? bytes;
+    // A new record if this submission's bytes are the global minimum and
+    // strictly fewer than any earlier accepted submission by anyone else.
+    const { data: prevBest } = await admin
+      .from("submissions")
+      .select("bytes")
+      .eq("problem_id", problemId)
+      .eq("verdict", "AC")
+      .neq("id", submission.id)
+      .order("bytes", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    const prev = prevBest?.bytes as number | undefined;
+    isRecord = prev === undefined || bytes < prev;
+    if (isRecord) bestBytes = bytes;
+  }
+
   // IMPORTANT: `results` only ever exposes index/hidden/verdict.
   // Hidden test case stdin/stdout are NEVER returned to the client.
   const responseBody: SubmitResponse = {
@@ -234,6 +263,8 @@ export async function POST(req: NextRequest) {
     passed,
     total,
     results: executions,
+    bestBytes,
+    isRecord,
   };
 
   return NextResponse.json<SubmitResponse>(responseBody, { status: 200 });

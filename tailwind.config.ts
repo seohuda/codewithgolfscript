@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  darkMode: "class",
   content: [
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -9,27 +10,27 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Material 3 inspired palette on a Baekjoon-like light surface.
+        // Theme-able via CSS variables (see globals.css :root / .dark).
         primary: {
-          DEFAULT: "#1a73e8", // Google blue
-          dark: "#1558b0",
-          light: "#4285f4",
-          container: "#d3e3fd",
+          DEFAULT: "rgb(var(--primary) / <alpha-value>)",
+          dark: "rgb(var(--primary-dark) / <alpha-value>)",
+          light: "rgb(var(--primary-light) / <alpha-value>)",
+          container: "rgb(var(--primary-container) / <alpha-value>)",
         },
         surface: {
-          DEFAULT: "#ffffff",
-          dim: "#f8f9fa",
-          variant: "#f1f3f4",
-          border: "#dadce0",
+          DEFAULT: "rgb(var(--surface) / <alpha-value>)",
+          dim: "rgb(var(--surface-dim) / <alpha-value>)",
+          variant: "rgb(var(--surface-variant) / <alpha-value>)",
+          border: "rgb(var(--surface-border) / <alpha-value>)",
         },
         ink: {
-          DEFAULT: "#202124", // primary text
-          soft: "#5f6368", // secondary text
-          faint: "#80868b", // tertiary text
+          DEFAULT: "rgb(var(--ink) / <alpha-value>)",
+          soft: "rgb(var(--ink-soft) / <alpha-value>)",
+          faint: "rgb(var(--ink-faint) / <alpha-value>)",
         },
-        success: "#188038",
-        danger: "#d93025",
-        warning: "#e37400",
+        success: "rgb(var(--success) / <alpha-value>)",
+        danger: "rgb(var(--danger) / <alpha-value>)",
+        warning: "rgb(var(--warning) / <alpha-value>)",
       },
       fontFamily: {
         sans: [

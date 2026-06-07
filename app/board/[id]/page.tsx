@@ -19,7 +19,9 @@ interface Post {
 
 interface Comment {
   id: number;
+  user_id: string;
   author: string;
+  author_is_admin: boolean;
   body: string;
   created_at: string;
 }
@@ -51,6 +53,8 @@ export default function PostDetailPage() {
   const [comment, setComment] = useState("");
   const [posting, setPosting] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editBody, setEditBody] = useState("");
 
   const load = useCallback(async () => {
     try {
@@ -114,6 +118,40 @@ export default function PostDetailPage() {
   }
 
   const canModify = !!user && !!post && user.id === post.user_id;
+
+  function startEdit(c: Comment) {
+    setEditingId(c.id);
+    setEditBody(c.body);
+  }
+
+  async function saveEdit(commentId: number) {
+    if (!editBody.trim()) return;
+    const res = await fetch(`/api/board/${id}/comments/${commentId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ body: editBody.trim() }),
+    });
+    if (res.ok) {
+      setEditingId(null);
+      setEditBody("");
+      await load();
+    } else {
+      const d = await res.json();
+      alert(d.error ?? "수정에 실패했습니다.");
+    }
+  }
+
+  async function deleteComment(commentId: number) {
+    if (!confirm("이 댓글을 삭제하시겠습니까?")) return;
+    const res = await fetch(`/api/board/${id}/comments/${commentId}`, {
+      method: "DELETE",
+    });
+    if (res.ok) await load();
+    else {
+      const d = await res.json();
+      alert(d.error ?? "삭제에 실패했습니다.");
+    }
+  }
 
   if (loading) {
     return (
@@ -199,17 +237,76 @@ export default function PostDetailPage() {
 
         {comments.length > 0 && (
           <div className="card divide-y divide-surface-border">
-            {comments.map((c) => (
-              <div key={c.id} className="p-4">
-                <div className="flex items-center gap-2 text-xs text-ink-faint">
-                  <span className="font-medium text-ink-soft">{c.author}</span>
-                  <span>{formatTime(c.created_at)}</span>
+            {comments.map((c) => {
+              const mine = !!user && user.id === c.user_id;
+              const editing = editingId === c.id;
+              return (
+                <div key={c.id} className="p-4">
+                  <div className="flex items-center justify-between gap-2 text-xs text-ink-faint">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={
+                          c.author_is_admin
+                            ? "font-semibold text-primary"
+                            : "font-medium text-ink-soft"
+                        }
+                      >
+                        {c.author}
+                        {c.author_is_admin && " (관리자)"}
+                      </span>
+                      <span>{formatTime(c.created_at)}</span>
+                    </div>
+                    {mine && !editing && (
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => startEdit(c)}
+                          className="text-ink-soft hover:text-primary"
+                        >
+                          수정
+                        </button>
+                        <button
+                          onClick={() => deleteComment(c.id)}
+                          className="text-ink-soft hover:text-danger"
+                        >
+                          삭제
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  {editing ? (
+                    <div className="mt-2 space-y-2">
+                      <textarea
+                        value={editBody}
+                        onChange={(e) => setEditBody(e.target.value)}
+                        rows={3}
+                        className="field resize-y"
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => saveEdit(c.id)}
+                          className="btn-filled px-3 py-1.5 text-xs"
+                        >
+                          저장
+                        </button>
+                        <button
+                          onClick={() => {
+                            setEditingId(null);
+                            setEditBody("");
+                          }}
+                          className="btn-outlined px-3 py-1.5 text-xs"
+                        >
+                          취소
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="mt-1.5 whitespace-pre-wrap text-sm text-ink">
+                      {c.body}
+                    </p>
+                  )}
                 </div>
-                <p className="mt-1.5 whitespace-pre-wrap text-sm text-ink">
-                  {c.body}
-                </p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 

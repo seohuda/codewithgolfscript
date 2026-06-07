@@ -3,7 +3,8 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import TierBadge from "@/components/TierBadge";
-import { getTierInfo } from "@/lib/tiers";
+import { useAuth } from "@/components/AuthProvider";
+import { STEP_GROUPS } from "@/scripts/problems.steps";
 
 interface Row {
   id: number;
@@ -11,9 +12,10 @@ interface Row {
   tier: number;
   source: string | null;
   step_group: string | null;
+  solvedCount: number;
+  acRate: number;
 }
 
-// Tier filter options: group representative tiers.
 const TIER_OPTIONS = [
   { label: "전체 티어", value: "" },
   { label: "브론즈", value: "bronze", min: 1, max: 5 },
@@ -24,7 +26,40 @@ const TIER_OPTIONS = [
   { label: "루비", value: "ruby", min: 26, max: 30 },
 ];
 
+type Status = "solved" | "tried" | "none";
+
+function StatusIcon({ status }: { status: Status }) {
+  if (status === "solved") {
+    return (
+      <span title="맞은 문제" className="text-success">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+          <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.18" />
+          <path
+            d="M7 12.5l3.2 3.2L17 9"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </span>
+    );
+  }
+  if (status === "tried") {
+    return (
+      <span title="시도했지만 못 푼 문제" className="text-danger">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+          <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.18" />
+          <circle cx="12" cy="12" r="3.2" fill="currentColor" />
+        </svg>
+      </span>
+    );
+  }
+  return <span className="inline-block h-4 w-4" aria-hidden />;
+}
+
 export default function ProblemsPage() {
+  const { user } = useAuth();
   const [rows, setRows] = useState<Row[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -33,8 +68,38 @@ export default function ProblemsPage() {
 
   const [searchInput, setSearchInput] = useState("");
   const [query, setQuery] = useState("");
-  const [group, setGroup] = useState(""); // bronze/silver/...
+  const [tierGroup, setTierGroup] = useState("");
+  const [stepGroup, setStepGroup] = useState("");
   const [sort, setSort] = useState<"tier" | "id">("tier");
+  const [unsolvedOnly, setUnsolvedOnly] = useState(false);
+
+  const [solved, setSolved] = useState<Set<number>>(new Set());
+  const [tried, setTried] = useState<Set<number>>(new Set());
+
+  // Load the user's solve status once (and when login changes).
+  useEffect(() => {
+    let cancelled = false;
+    async function loadStatus() {
+      if (!user) {
+        setSolved(new Set());
+        setTried(new Set());
+        return;
+      }
+      try {
+        const res = await fetch("/api/me/solved", { cache: "no-store" });
+        const d = await res.json();
+        if (cancelled) return;
+        setSolved(new Set<number>(d.solved ?? []));
+        setTried(new Set<number>(d.tried ?? []));
+      } catch {
+        /* ignore */
+      }
+    }
+    loadStatus();
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -43,7 +108,8 @@ export default function ProblemsPage() {
       if (query) params.set("q", query);
       params.set("sort", sort);
       params.set("page", String(page));
-      const opt = TIER_OPTIONS.find((o) => o.value === group);
+      if (stepGroup) params.set("group", stepGroup);
+      const opt = TIER_OPTIONS.find((o) => o.value === tierGroup);
       if (opt && opt.min !== undefined) {
         params.set("tierMin", String(opt.min));
         params.set("tierMax", String(opt.max));
@@ -65,7 +131,7 @@ export default function ProblemsPage() {
     } finally {
       setLoading(false);
     }
-  }, [query, sort, page, group]);
+  }, [query, sort, page, tierGroup, stepGroup]);
 
   useEffect(() => {
     load();
@@ -76,6 +142,16 @@ export default function ProblemsPage() {
     setPage(1);
     setQuery(searchInput.trim());
   }
+
+  function statusOf(id: number): Status {
+    if (solved.has(id)) return "solved";
+    if (tried.has(id)) return "tried";
+    return "none";
+  }
+
+  const visibleRows = unsolvedOnly
+    ? rows.filter((p) => !solved.has(p.id))
+    : rows;
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const pageNumbers: number[] = [];
@@ -89,7 +165,7 @@ export default function ProblemsPage() {
         <div>
           <h1 className="text-2xl font-bold text-ink">전체 문제</h1>
           <p className="mt-1 text-sm text-ink-soft">
-            제목으로 검색하고 티어로 거를 수 있습니다.
+            제목 검색, 티어·단계 필터로 원하는 문제를 찾으세요.
           </p>
         </div>
         <Link href="/steps" className="btn-text">
@@ -98,46 +174,74 @@ export default function ProblemsPage() {
       </div>
 
       {/* Controls */}
-      <div className="card flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
-        <form onSubmit={submitSearch} className="flex flex-1 gap-2">
-          <input
-            type="text"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="문제 제목 검색"
-            className="field flex-1"
-          />
-          <button type="submit" className="btn-filled px-4">
-            검색
-          </button>
-        </form>
-        <div className="flex gap-2">
-          <select
-            value={group}
-            onChange={(e) => {
-              setGroup(e.target.value);
-              setPage(1);
-            }}
-            className="field w-auto"
-          >
-            {TIER_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-          <select
-            value={sort}
-            onChange={(e) => {
-              setSort(e.target.value as "tier" | "id");
-              setPage(1);
-            }}
-            className="field w-auto"
-          >
-            <option value="tier">티어순</option>
-            <option value="id">등록순</option>
-          </select>
+      <div className="card space-y-3 p-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <form onSubmit={submitSearch} className="flex flex-1 gap-2">
+            <input
+              type="text"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              placeholder="문제 제목 검색"
+              className="field flex-1"
+            />
+            <button type="submit" className="btn-filled px-4">
+              검색
+            </button>
+          </form>
+          <div className="flex flex-wrap gap-2">
+            <select
+              value={tierGroup}
+              onChange={(e) => {
+                setTierGroup(e.target.value);
+                setPage(1);
+              }}
+              className="field w-auto"
+            >
+              {TIER_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+            <select
+              value={stepGroup}
+              onChange={(e) => {
+                setStepGroup(e.target.value);
+                setPage(1);
+              }}
+              className="field w-auto"
+            >
+              <option value="">전체 단계</option>
+              {STEP_GROUPS.map((g) => (
+                <option key={g.name} value={g.name}>
+                  {g.name}
+                </option>
+              ))}
+            </select>
+            <select
+              value={sort}
+              onChange={(e) => {
+                setSort(e.target.value as "tier" | "id");
+                setPage(1);
+              }}
+              className="field w-auto"
+            >
+              <option value="tier">티어순</option>
+              <option value="id">등록순</option>
+            </select>
+          </div>
         </div>
+        {user && (
+          <label className="flex items-center gap-2 text-sm text-ink-soft">
+            <input
+              type="checkbox"
+              checked={unsolvedOnly}
+              onChange={(e) => setUnsolvedOnly(e.target.checked)}
+              className="h-4 w-4 accent-primary"
+            />
+            안 푼 문제만 보기
+          </label>
+        )}
       </div>
 
       {/* Results */}
@@ -145,28 +249,43 @@ export default function ProblemsPage() {
         <div className="card p-10 text-center text-sm text-ink-faint">
           불러오는 중…
         </div>
-      ) : rows.length === 0 ? (
+      ) : visibleRows.length === 0 ? (
         <div className="card p-10 text-center text-sm text-ink-soft">
-          {query ? `"${query}" 검색 결과가 없습니다.` : "문제가 없습니다."}
+          {query
+            ? `"${query}" 검색 결과가 없습니다.`
+            : unsolvedOnly
+              ? "이 페이지의 문제를 모두 풀었습니다!"
+              : "문제가 없습니다."}
         </div>
       ) : (
         <div className="card overflow-hidden">
           <table className="w-full border-collapse text-sm">
             <thead>
               <tr className="border-b border-surface-border bg-surface-dim text-left text-xs font-semibold text-ink-soft">
+                {user && <th className="w-10 px-2 py-3 text-center">상태</th>}
                 <th className="w-28 px-4 py-3">티어</th>
                 <th className="px-4 py-3">제목</th>
-                <th className="hidden px-4 py-3 text-right md:table-cell">
-                  출처
+                <th className="hidden w-24 px-4 py-3 text-right sm:table-cell">
+                  맞은 사람
+                </th>
+                <th className="hidden w-20 px-4 py-3 text-right sm:table-cell">
+                  정답률
                 </th>
               </tr>
             </thead>
             <tbody>
-              {rows.map((p) => (
+              {visibleRows.map((p) => (
                 <tr
                   key={p.id}
                   className="border-b border-surface-border last:border-0 hover:bg-surface-dim"
                 >
+                  {user && (
+                    <td className="px-2 py-3 text-center">
+                      <span className="inline-flex justify-center">
+                        <StatusIcon status={statusOf(p.id)} />
+                      </span>
+                    </td>
+                  )}
                   <td className="px-4 py-3">
                     <TierBadge tier={p.tier} showName size="sm" />
                   </td>
@@ -178,10 +297,11 @@ export default function ProblemsPage() {
                       {p.title}
                     </Link>
                   </td>
-                  <td className="hidden px-4 py-3 text-right text-xs text-ink-faint md:table-cell">
-                    {p.source && !p.source.startsWith("자체 제작")
-                      ? p.source
-                      : ""}
+                  <td className="hidden px-4 py-3 text-right text-ink-soft sm:table-cell">
+                    {p.solvedCount}
+                  </td>
+                  <td className="hidden px-4 py-3 text-right text-ink-faint sm:table-cell">
+                    {p.solvedCount > 0 ? `${p.acRate}%` : "-"}
                   </td>
                 </tr>
               ))}

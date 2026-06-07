@@ -67,6 +67,15 @@ export async function GET(
       verdictCounts[s.verdict] = (verdictCounts[s.verdict] ?? 0) + 1;
     }
 
+    // Daily submission counts for the last ~17 weeks (activity graph).
+    const dayCounts: Record<string, number> = {};
+    for (const s of submissions) {
+      const day = new Date(s.created_at as string)
+        .toISOString()
+        .slice(0, 10);
+      dayCounts[day] = (dayCounts[day] ?? 0) + 1;
+    }
+
     // Distinct solved problems with best (smallest) bytes.
     const bestByProblem = new Map<number, number>();
     for (const s of submissions) {
@@ -113,6 +122,7 @@ export async function GET(
         userTier: rating.tier,
       },
       solvedProblems,
+      activity: dayCounts,
     });
   } catch (e) {
     return NextResponse.json(

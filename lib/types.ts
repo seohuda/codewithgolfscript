@@ -66,4 +66,6 @@ export interface SubmitResponse {
   total: number;
   results: CaseResult[];
   message?: string;
+  bestBytes?: number | null;
+  isRecord?: boolean;
 }

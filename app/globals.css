@@ -4,14 +4,46 @@
 
 :root {
   color-scheme: light;
+  --primary: 26 115 232;
+  --primary-dark: 21 88 176;
+  --primary-light: 66 133 244;
+  --primary-container: 211 227 253;
+  --surface: 255 255 255;
+  --surface-dim: 248 249 250;
+  --surface-variant: 241 243 244;
+  --surface-border: 218 220 224;
+  --ink: 32 33 36;
+  --ink-soft: 95 99 104;
+  --ink-faint: 128 134 139;
+  --success: 24 128 56;
+  --danger: 217 48 37;
+  --warning: 227 116 0;
+}
+
+.dark {
+  color-scheme: dark;
+  --primary: 138 180 248;
+  --primary-dark: 102 154 246;
+  --primary-light: 168 199 250;
+  --primary-container: 30 51 84;
+  --surface: 30 31 34;
+  --surface-dim: 23 24 27;
+  --surface-variant: 41 42 46;
+  --surface-border: 60 62 67;
+  --ink: 232 234 237;
+  --ink-soft: 154 160 166;
+  --ink-faint: 124 130 136;
+  --success: 129 201 149;
+  --danger: 242 139 130;
+  --warning: 253 187 109;
 }
 
 html,
 body {
   padding: 0;
   margin: 0;
-  background-color: #f8f9fa;
-  color: #202124;
+  background-color: rgb(var(--surface-dim));
+  color: rgb(var(--ink));
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -21,8 +53,8 @@ body {
 }
 
 ::selection {
-  background: rgba(26, 115, 232, 0.18);
-  color: #202124;
+  background: rgb(var(--primary) / 0.22);
+  color: rgb(var(--ink));
 }
 
 ::-webkit-scrollbar {
@@ -31,18 +63,18 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f3f4;
+  background: rgb(var(--surface-variant));
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #dadce0;
+  background: rgb(var(--surface-border));
   border-radius: 9999px;
-  border: 3px solid #f1f3f4;
+  border: 3px solid rgb(var(--surface-variant));
   background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #bdc1c6;
+  background: rgb(var(--ink-faint));
   background-clip: padding-box;
 }
 
@@ -85,5 +117,5 @@ body {
 }
 
 .golf-editor::placeholder {
-  color: #9aa0a6;
+  color: rgb(var(--ink-faint));
 }
