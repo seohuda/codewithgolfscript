@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "./AuthProvider";
+import NotificationBell from "./NotificationBell";
 
 export default function HeaderNav() {
   const { user, loading, logout } = useAuth();
@@ -21,6 +22,7 @@ export default function HeaderNav() {
   if (user) {
     return (
       <div className="flex items-center gap-3 text-sm">
+        <NotificationBell />
         {user.isAdmin && (
           <Link
             href="/admin"

@@ -85,6 +85,27 @@ export async function POST(
       { status: 500 },
     );
   }
+
+  // Notify the post owner (unless commenting on their own post). Best-effort.
+  try {
+    const { data: post } = await admin
+      .from("posts")
+      .select("user_id, title")
+      .eq("id", postId)
+      .maybeSingle();
+    if (post && post.user_id !== session.userId) {
+      await admin.from("notifications").insert({
+        user_id: post.user_id,
+        actor: session.username,
+        type: "comment",
+        post_id: postId,
+        message: `${session.username}님이 "${post.title}" 글에 댓글을 남겼습니다.`,
+      });
+    }
+  } catch (e) {
+    console.error("notification insert failed:", e);
+  }
+
   return NextResponse.json({ ok: true });
 }
 

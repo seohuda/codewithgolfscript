@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
 import { rateUser } from "@/lib/score";
+import { computeBadges } from "@/lib/badges";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -99,10 +100,11 @@ export async function GET(
 
     const solvedIds = [...bestByProblem.keys()];
     let solvedProblems: SolvedProblem[] = [];
+    const groupCounts: Record<string, number> = {};
     if (solvedIds.length > 0) {
       const { data: probs } = await admin
         .from("problems")
-        .select("id, title, tier")
+        .select("id, title, tier, step_group")
         .in("id", solvedIds);
       solvedProblems = (probs ?? [])
         .map((p) => ({
@@ -112,9 +114,30 @@ export async function GET(
           bytes: bestByProblem.get(p.id as number) ?? 0,
         }))
         .sort((a, b) => b.tier - a.tier || a.title.localeCompare(b.title));
+      for (const p of probs ?? []) {
+        const g = (p.step_group as string) || "";
+        if (g) groupCounts[g] = (groupCounts[g] ?? 0) + 1;
+      }
     }
 
     const rating = rateUser(solvedProblems.map((p) => p.tier));
+
+    // Badge inputs.
+    const minBytes = solvedProblems.length
+      ? Math.min(...solvedProblems.map((p) => p.bytes))
+      : null;
+    const maxTier = solvedProblems.length
+      ? Math.max(...solvedProblems.map((p) => p.tier))
+      : 0;
+    const activeDays = Object.keys(dayCounts).length;
+    const badges = computeBadges({
+      solvedCount: bestByProblem.size,
+      acSubmissions,
+      minBytes,
+      maxTier,
+      activeDays,
+      groupCounts,
+    });
 
     return NextResponse.json({
       user: {
@@ -134,6 +157,7 @@ export async function GET(
       },
       solvedProblems,
       activity: dayCounts,
+      badges,
     });
   } catch (e) {
     return NextResponse.json(

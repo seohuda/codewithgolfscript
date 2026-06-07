@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import TierBadge from "@/components/TierBadge";
 import { useAuth } from "@/components/AuthProvider";
+import RandomProblemButton from "@/components/RandomProblemButton";
 
 interface Row {
   id: number;
@@ -181,9 +182,12 @@ export default function ProblemsPage() {
         <div>
           <h1 className="text-2xl font-bold text-ink">전체 문제</h1>
         </div>
-        <Link href="/steps" className="btn-text">
-          단계별로 풀기 →
-        </Link>
+        <div className="flex items-center gap-2">
+          <RandomProblemButton className="btn-text" />
+          <Link href="/steps" className="btn-text">
+            단계별로 풀기 →
+          </Link>
+        </div>
       </div>
 
       {/* Controls */}

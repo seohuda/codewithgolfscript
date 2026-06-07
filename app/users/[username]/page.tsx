@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import TierBadge from "@/components/TierBadge";
 import ActivityGraph from "@/components/ActivityGraph";
+import BadgeGrid from "@/components/BadgeGrid";
 import { getTierInfo } from "@/lib/tiers";
 
 interface SolvedProblem {
@@ -28,6 +29,7 @@ interface ProfileData {
   };
   solvedProblems: SolvedProblem[];
   activity: Record<string, number>;
+  badges: { id: string; name: string; desc: string; earned: boolean }[];
 }
 
 const VERDICT_LABEL: Record<string, string> = {
@@ -176,6 +178,8 @@ export default function ProfilePage() {
 
       {/* Activity graph */}
       <ActivityGraph activity={data.activity ?? {}} />
+
+      <BadgeGrid badges={data.badges ?? []} />
 
       {/* Verdict breakdown */}
       {stats.totalSubmissions > 0 && (
