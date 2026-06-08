@@ -53,6 +53,28 @@ export async function POST(
   if (error) {
     return NextResponse.json({ error: "팔로우에 실패했습니다." }, { status: 500 });
   }
+
+  // Notify the followed user (best-effort, only on a new follow).
+  try {
+    const { data: existing } = await admin
+      .from("notifications")
+      .select("id")
+      .eq("user_id", target.id)
+      .eq("type", "follow")
+      .eq("actor", session.username)
+      .maybeSingle();
+    if (!existing) {
+      await admin.from("notifications").insert({
+        user_id: target.id,
+        actor: session.username,
+        type: "follow",
+        message: `${session.username}님이 회원님을 팔로우하기 시작했습니다.`,
+      });
+    }
+  } catch {
+    /* notification failure must not block the follow */
+  }
+
   return NextResponse.json({ ok: true, following: true });
 }
 

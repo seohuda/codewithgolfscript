@@ -74,7 +74,11 @@ export default function NotificationBell() {
 
   function goto(n: Notification) {
     setOpen(false);
-    if (n.post_id) router.push(`/board/${n.post_id}`);
+    if (n.type === "follow" && n.actor) {
+      router.push(`/users/${encodeURIComponent(n.actor)}`);
+    } else if (n.post_id) {
+      router.push(`/board/${n.post_id}`);
+    }
   }
 
   if (!user) return null;
