@@ -220,12 +220,18 @@ export default function ProfilePage() {
             가입일 {formatDate(user.created_at)}
           </p>
           <div className="mt-2 flex gap-4 text-sm">
-            <span className="text-ink-soft">
+            <Link
+              href={`/users/${encodeURIComponent(user.username)}/follows?type=followers`}
+              className="text-ink-soft hover:text-accent hover:underline"
+            >
               팔로워 <span className="font-bold text-ink">{followers}</span>
-            </span>
-            <span className="text-ink-soft">
+            </Link>
+            <Link
+              href={`/users/${encodeURIComponent(user.username)}/follows?type=following`}
+              className="text-ink-soft hover:text-accent hover:underline"
+            >
               팔로잉 <span className="font-bold text-ink">{user.following}</span>
-            </span>
+            </Link>
           </div>
           {user.bio && !editing && (
             <p className="mt-3 whitespace-pre-wrap text-sm text-ink-soft">
