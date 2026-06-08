@@ -353,6 +353,8 @@ export async function POST(req: NextRequest) {
       code,
       bytes,
       verdict: finalVerdict,
+      score: score ?? null,
+      max_score: maxScore ?? null,
     })
     .select("id")
     .single();

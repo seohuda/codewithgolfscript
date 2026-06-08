@@ -58,7 +58,7 @@ export async function GET(
     // All submissions for this user.
     const { data: subs, error: subErr } = await admin
       .from("submissions")
-      .select("problem_id, bytes, verdict, created_at")
+      .select("problem_id, bytes, verdict, score, max_score, created_at")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .range(0, 9999);
@@ -123,6 +123,52 @@ export async function GET(
     }
 
     const rating = rateUser(solvedProblems.map((p) => p.tier));
+
+    // Partial-score problems: best score > 0 but not fully solved (no AC).
+    // Track the highest score achieved per problem from subtask scoring.
+    const bestScore = new Map<number, { score: number; max: number }>();
+    for (const s of submissions) {
+      if (s.score == null || s.max_score == null) continue;
+      const cur = bestScore.get(s.problem_id);
+      if (!cur || (s.score as number) > cur.score) {
+        bestScore.set(s.problem_id, {
+          score: s.score as number,
+          max: s.max_score as number,
+        });
+      }
+    }
+    const partialIds = [...bestScore.entries()]
+      .filter(
+        ([pid, v]) =>
+          v.score > 0 && v.score < v.max && !bestByProblem.has(pid),
+      )
+      .map(([pid]) => pid);
+
+    let partialProblems: {
+      id: number;
+      title: string;
+      tier: number;
+      score: number;
+      maxScore: number;
+    }[] = [];
+    if (partialIds.length > 0) {
+      const { data: pprobs } = await admin
+        .from("problems")
+        .select("id, title, tier")
+        .in("id", partialIds);
+      partialProblems = (pprobs ?? [])
+        .map((p) => {
+          const v = bestScore.get(p.id as number)!;
+          return {
+            id: p.id as number,
+            title: p.title as string,
+            tier: (p.tier as number) ?? 0,
+            score: v.score,
+            maxScore: v.max,
+          };
+        })
+        .sort((a, b) => b.tier - a.tier || a.title.localeCompare(b.title));
+    }
 
     // Badge inputs.
     const minBytes = solvedProblems.length
@@ -194,6 +240,7 @@ export async function GET(
         userTier: rating.tier,
       },
       solvedProblems,
+      partialProblems,
       activity: dayCounts,
       badges,
     });

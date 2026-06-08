@@ -16,6 +16,14 @@ interface SolvedProblem {
   bytes: number;
 }
 
+interface PartialProblem {
+  id: number;
+  title: string;
+  tier: number;
+  score: number;
+  maxScore: number;
+}
+
 interface ProfileData {
   user: {
     username: string;
@@ -39,6 +47,7 @@ interface ProfileData {
     userTier: number;
   };
   solvedProblems: SolvedProblem[];
+  partialProblems: PartialProblem[];
   activity: Record<string, number>;
   badges: { id: string; name: string; desc: string; earned: boolean }[];
 }
@@ -178,6 +187,7 @@ export default function ProfilePage() {
   }
 
   const { user, stats, solvedProblems } = data;
+  const partialProblems = data.partialProblems ?? [];
   const earnedBadges = (data.badges ?? []).filter((b) => b.earned);
   const featured =
     user.featured_badge
@@ -409,11 +419,56 @@ export default function ProfilePage() {
                     </td>
                   </tr>
                 ))}
-              </tbody>
+                </tbody>
             </table>
           </div>
         )}
       </section>
+
+      {/* Partial-score problems (solved but not full marks) */}
+      {partialProblems.length > 0 && (
+        <section>
+          <h2 className="mb-3 text-sm font-bold text-ink">
+            부분 점수 문제{" "}
+            <span className="text-ink-faint">({partialProblems.length})</span>
+          </h2>
+          <div className="card overflow-hidden">
+            <table className="w-full border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-surface-border bg-surface-dim text-left text-xs font-semibold text-ink-soft">
+                  <th className="w-28 px-4 py-3">티어</th>
+                  <th className="px-4 py-3">제목</th>
+                  <th className="px-4 py-3 text-right">점수</th>
+                </tr>
+              </thead>
+              <tbody>
+                {partialProblems.map((p) => (
+                  <tr
+                    key={p.id}
+                    className="border-b border-surface-border last:border-0 hover:bg-surface-dim"
+                  >
+                    <td className="px-4 py-3">
+                      <TierBadge tier={p.tier} showName size="sm" />
+                    </td>
+                    <td className="px-4 py-3">
+                      <Link
+                        href={`/problems/${p.id}`}
+                        className="font-medium hover:underline"
+                        style={{ color: "#e6a700" }}
+                      >
+                        {p.title}
+                      </Link>
+                    </td>
+                    <td className="px-4 py-3 text-right font-mono font-semibold" style={{ color: "#e6a700" }}>
+                      {p.score} / {p.maxScore}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
     </div>
   );
 }
