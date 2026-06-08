@@ -6,6 +6,7 @@ import {
   validatePassword,
   validateEmail,
   normalizeEmail,
+  escapeLike,
 } from "@/lib/auth";
 import { generateToken, VERIFY_TOKEN_TTL_MS } from "@/lib/tokens";
 import { sendVerificationEmail, siteUrl } from "@/lib/email";
@@ -85,7 +86,7 @@ export async function POST(req: NextRequest) {
   const { data: emailTaken } = await admin
     .from("users")
     .select("id")
-    .ilike("email", email)
+    .ilike("email", escapeLike(email))
     .maybeSingle();
   if (emailTaken) {
     return NextResponse.json(
@@ -98,7 +99,7 @@ export async function POST(req: NextRequest) {
   const { data: existing, error: selErr } = await admin
     .from("users")
     .select("id, username, password_hash")
-    .ilike("username", username)
+    .ilike("username", escapeLike(username))
     .maybeSingle();
 
   if (selErr) {

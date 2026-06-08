@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
-import { validateUsername } from "@/lib/auth";
+import { validateUsername, escapeLike } from "@/lib/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
     const { data } = await admin
       .from("users")
       .select("id, password_hash")
-      .ilike("username", username)
+      .ilike("username", escapeLike(username))
       .maybeSingle();
 
     // A legacy seed user with no password is still claimable.

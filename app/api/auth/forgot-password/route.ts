@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
-import { normalizeEmail } from "@/lib/auth";
+import { normalizeEmail, escapeLike } from "@/lib/auth";
 import { generateToken, RESET_TOKEN_TTL_MS } from "@/lib/tokens";
 import { sendPasswordResetEmail, siteUrl } from "@/lib/email";
 
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     const { data: user } = await admin
       .from("users")
       .select("id")
-      .ilike("email", email)
+      .ilike("email", escapeLike(email))
       .maybeSingle();
 
     if (user) {

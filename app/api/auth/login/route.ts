@@ -5,6 +5,7 @@ import {
   createSessionToken,
   SESSION_COOKIE,
   SESSION_COOKIE_OPTIONS,
+  escapeLike,
 } from "@/lib/auth";
 import { generateToken, RESET_TOKEN_TTL_MS } from "@/lib/tokens";
 import { sendPasswordResetEmail, siteUrl } from "@/lib/email";
@@ -62,7 +63,7 @@ export async function POST(req: NextRequest) {
     .select(
       "id, username, password_hash, is_admin, email_verified, email, failed_login_count, lockout_until, suspended, suspended_reason",
     )
-    .ilike("username", username)
+    .ilike("username", escapeLike(username))
     .maybeSingle();
 
   if (error) {
@@ -80,20 +81,8 @@ export async function POST(req: NextRequest) {
 
   if (!user || !user.password_hash) return invalid;
 
-  // Admin-suspended accounts cannot log in.
-  if (user.suspended) {
-    return NextResponse.json(
-      {
-        error: user.suspended_reason
-          ? `정지된 계정입니다: ${user.suspended_reason}`
-          : "정지된 계정입니다. 관리자에게 문의하세요.",
-        suspended: true,
-      },
-      { status: 403 },
-    );
-  }
-
-  // Account currently locked?
+  // Account currently locked? (Checked before password verification so a
+  // locked account stays locked even with the right password.)
   if (user.lockout_until && new Date(user.lockout_until as string) > new Date()) {
     const mins = Math.ceil(
       (new Date(user.lockout_until as string).getTime() - Date.now()) / 60000,
@@ -148,8 +137,32 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // --- Password is correct from here on -------------------------------
+
+  // Admin-suspended accounts cannot log in. Checked AFTER password
+  // verification so the suspended state is not an enumeration oracle.
+  if (user.suspended) {
+    return NextResponse.json(
+      {
+        error: user.suspended_reason
+          ? `정지된 계정입니다: ${user.suspended_reason}`
+          : "정지된 계정입니다. 관리자에게 문의하세요.",
+        suspended: true,
+      },
+      { status: 403 },
+    );
+  }
+
   // Email verification is required before logging in.
   if (!user.email_verified) {
+    // Correct password but unverified: still clear the failure counter so
+    // earlier wrong attempts don't accumulate toward a lockout.
+    if ((user.failed_login_count as number) > 0) {
+      await admin
+        .from("users")
+        .update({ failed_login_count: 0, lockout_until: null })
+        .eq("id", user.id);
+    }
     return NextResponse.json(
       {
         error: "이메일 인증이 필요합니다. 가입 시 받은 인증 메일을 확인해 주세요.",

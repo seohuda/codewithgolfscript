@@ -47,7 +47,7 @@ export async function POST(
 
   if (action === "suspend") {
     const reason = (body.reason ?? "").trim().slice(0, 500);
-    await admin
+    const { error } = await admin
       .from("users")
       .update({
         suspended: true,
@@ -55,6 +55,9 @@ export async function POST(
         suspended_at: new Date().toISOString(),
       })
       .eq("id", userId);
+    if (error) {
+      return NextResponse.json({ error: "정지에 실패했습니다." }, { status: 500 });
+    }
     await logAdminAction({
       adminId,
       action: "suspend_user",
@@ -66,7 +69,7 @@ export async function POST(
   }
 
   if (action === "unsuspend") {
-    await admin
+    const { error } = await admin
       .from("users")
       .update({
         suspended: false,
@@ -74,6 +77,12 @@ export async function POST(
         suspended_at: null,
       })
       .eq("id", userId);
+    if (error) {
+      return NextResponse.json(
+        { error: "정지 해제에 실패했습니다." },
+        { status: 500 },
+      );
+    }
     await logAdminAction({
       adminId,
       action: "unsuspend_user",

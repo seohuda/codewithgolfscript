@@ -3,7 +3,7 @@ import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
 import { rateUser } from "@/lib/score";
 import { computeBadges } from "@/lib/badges";
 import { kstDayKey } from "@/lib/date";
-import { verifySessionToken, SESSION_COOKIE } from "@/lib/auth";
+import { verifySessionToken, SESSION_COOKIE, escapeLike } from "@/lib/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -42,7 +42,7 @@ export async function GET(
     const { data: user, error: userErr } = await admin
       .from("users")
       .select("id, username, created_at, is_admin, bio, featured_badge")
-      .ilike("username", safeName)
+      .ilike("username", escapeLike(safeName))
       .maybeSingle();
 
     if (userErr) {

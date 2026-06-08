@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
-import { verifySessionToken, SESSION_COOKIE } from "@/lib/auth";
+import { verifySessionToken, SESSION_COOKIE, escapeLike } from "@/lib/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -11,7 +11,7 @@ async function resolveTarget(username: string) {
   const { data } = await admin
     .from("users")
     .select("id, username")
-    .ilike("username", username)
+    .ilike("username", escapeLike(username))
     .maybeSingle();
   return data;
 }

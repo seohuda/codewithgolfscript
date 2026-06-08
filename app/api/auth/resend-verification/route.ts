@@ -3,6 +3,7 @@ import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
 import {
   verifyPassword,
   normalizeEmail,
+  escapeLike,
 } from "@/lib/auth";
 import { generateToken, VERIFY_TOKEN_TTL_MS } from "@/lib/tokens";
 import { sendVerificationEmail, siteUrl } from "@/lib/email";
@@ -35,7 +36,7 @@ export async function POST(req: NextRequest) {
   const { data: user } = await admin
     .from("users")
     .select("id, password_hash, email, email_verified")
-    .ilike("username", username)
+    .ilike("username", escapeLike(username))
     .maybeSingle();
 
   // Always return a generic success to avoid account enumeration.

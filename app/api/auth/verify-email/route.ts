@@ -50,15 +50,16 @@ export async function POST(req: NextRequest) {
   // Log the user in immediately after a successful verification.
   const { data: u } = await admin
     .from("users")
-    .select("id, username")
+    .select("id, username, suspended")
     .eq("id", row.user_id)
     .maybeSingle();
 
   const res = NextResponse.json({
     ok: true,
-    user: u ? { id: u.id, username: u.username } : undefined,
+    user: u && !u.suspended ? { id: u.id, username: u.username } : undefined,
   });
-  if (u) {
+  // Do not hand a session to a suspended account.
+  if (u && !u.suspended) {
     const token = createSessionToken({
       userId: u.id as string,
       username: u.username as string,

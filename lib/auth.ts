@@ -144,3 +144,12 @@ export function validateEmail(email: string): string | null {
 export function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }
+
+/**
+ * Escapes PostgREST/SQL LIKE wildcards (% and _) so a value can be used
+ * in an `.ilike()` filter as a literal, case-insensitive exact match.
+ * Without this, "_" (single-char wildcard) lets "a_min" match "admin".
+ */
+export function escapeLike(value: string): string {
+  return value.replace(/([\\%_])/g, "\\$1");
+}

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
+import { escapeLike } from "@/lib/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -27,7 +28,7 @@ export async function GET(
   const { data: user } = await admin
     .from("users")
     .select("id")
-    .ilike("username", username)
+    .ilike("username", escapeLike(username))
     .maybeSingle();
   if (!user) {
     return NextResponse.json({ error: "유저를 찾을 수 없습니다." }, { status: 404 });
