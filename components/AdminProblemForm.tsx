@@ -8,6 +8,13 @@ export interface TestCaseDraft {
   stdin: string;
   stdout: string;
   is_hidden: boolean;
+  subtask: number;
+}
+
+export interface SubtaskDraft {
+  no: number;
+  points: number;
+  desc: string;
 }
 
 export interface ProblemDraft {
@@ -23,6 +30,7 @@ export interface ProblemDraft {
   sample_output: string;
   image_url: string;
   tags: string[];
+  subtasks: SubtaskDraft[];
 }
 
 interface Props {
@@ -32,7 +40,7 @@ interface Props {
   initialCases: TestCaseDraft[];
 }
 
-const empty: TestCaseDraft = { stdin: "", stdout: "", is_hidden: false };
+const empty: TestCaseDraft = { stdin: "", stdout: "", is_hidden: false, subtask: 0 };
 
 export default function AdminProblemForm({
   mode,
@@ -116,6 +124,32 @@ export default function AdminProblemForm({
   function removeCase(i: number) {
     setCases((prev) => prev.filter((_, idx) => idx !== i));
   }
+
+  function setSubtask(i: number, patch: Partial<SubtaskDraft>) {
+    setP((prev) => ({
+      ...prev,
+      subtasks: prev.subtasks.map((s, idx) =>
+        idx === i ? { ...s, ...patch } : s,
+      ),
+    }));
+  }
+  function addSubtask() {
+    setP((prev) => ({
+      ...prev,
+      subtasks: [
+        ...prev.subtasks,
+        { no: prev.subtasks.length + 1, points: 0, desc: "" },
+      ],
+    }));
+  }
+  function removeSubtask(i: number) {
+    setP((prev) => ({
+      ...prev,
+      subtasks: prev.subtasks.filter((_, idx) => idx !== i),
+    }));
+  }
+
+  const totalPoints = p.subtasks.reduce((a, s) => a + (Number(s.points) || 0), 0);
 
   async function handleSave() {
     setError(null);
@@ -349,6 +383,67 @@ export default function AdminProblemForm({
 
       <div className="card space-y-4 p-6">
         <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-sm font-bold uppercase tracking-wide text-ink">
+              서브태스크 (부분점수)
+            </h2>
+            <p className="mt-1 text-xs text-ink-faint">
+              비워두면 부분점수 없이 전체 통과 시 정답 처리됩니다. 정의하면 각
+              케이스에 서브태스크 번호를 지정하세요. 합계 {totalPoints}점.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={addSubtask}
+            className="btn-outlined px-3 py-1.5 text-xs"
+          >
+            서브태스크 추가
+          </button>
+        </div>
+        {p.subtasks.length === 0 ? (
+          <p className="text-xs text-ink-faint">서브태스크가 없습니다.</p>
+        ) : (
+          p.subtasks.map((s, i) => (
+            <div
+              key={i}
+              className="flex flex-wrap items-center gap-2 border border-surface-border p-3"
+            >
+              <label className="text-xs text-ink-soft">번호</label>
+              <input
+                type="number"
+                value={s.no}
+                onChange={(e) => setSubtask(i, { no: Number(e.target.value) })}
+                className="field w-16"
+              />
+              <label className="text-xs text-ink-soft">배점</label>
+              <input
+                type="number"
+                value={s.points}
+                onChange={(e) =>
+                  setSubtask(i, { points: Number(e.target.value) })
+                }
+                className="field w-20"
+              />
+              <input
+                value={s.desc}
+                onChange={(e) => setSubtask(i, { desc: e.target.value })}
+                placeholder="설명 (예: N=1)"
+                className="field flex-1"
+              />
+              <button
+                type="button"
+                onClick={() => removeSubtask(i)}
+                className="text-xs text-danger hover:underline"
+              >
+                삭제
+              </button>
+            </div>
+          ))
+        )}
+      </div>
+
+      <div className="card space-y-4 p-6">
+        <div className="flex items-center justify-between">
           <h2 className="text-sm font-bold uppercase tracking-wide text-ink">
             테스트 케이스
           </h2>
@@ -361,6 +456,25 @@ export default function AdminProblemForm({
             <div className="mb-2 flex items-center justify-between">
               <span className="font-mono text-xs text-ink-faint">#{i + 1}</span>
               <div className="flex items-center gap-3">
+                {p.subtasks.length > 0 && (
+                  <label className="flex items-center gap-1.5 text-xs text-ink-soft">
+                    서브태스크
+                    <select
+                      value={c.subtask}
+                      onChange={(e) =>
+                        setCase(i, { subtask: Number(e.target.value) })
+                      }
+                      className="field w-auto py-1"
+                    >
+                      <option value={0}>없음</option>
+                      {p.subtasks.map((s) => (
+                        <option key={s.no} value={s.no}>
+                          #{s.no}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
                 <label className="flex items-center gap-1.5 text-xs text-ink-soft">
                   <input
                     type="checkbox"

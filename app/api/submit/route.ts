@@ -7,6 +7,7 @@ import {
   CaseResult,
   SubmitRequestBody,
   SubmitResponse,
+  SubtaskResult,
   TestCase,
   Verdict,
 } from "@/lib/types";
@@ -230,7 +231,7 @@ export async function POST(req: NextRequest) {
   // --- Fetch ALL test cases (server-only, bypasses RLS) ---------------
   const { data: cases, error: casesErr } = await admin
     .from("test_cases")
-    .select("id, problem_id, stdin, stdout, is_hidden, created_at")
+    .select("id, problem_id, stdin, stdout, is_hidden, subtask, created_at")
     .eq("problem_id", problemId)
     .order("id", { ascending: true });
 
@@ -268,7 +269,7 @@ export async function POST(req: NextRequest) {
   }
 
   // --- Execute each case (in parallel) via Piston ---------------------
-  const executions = await Promise.all(
+  const execRaw = await Promise.all(
     testCases.map(async (tc, index) => {
       const run = await runGolfScriptCase(code, tc.stdin);
 
@@ -280,14 +281,22 @@ export async function POST(req: NextRequest) {
         verdict = expected === actual ? "AC" : "WA";
       }
 
-      const result: CaseResult = {
+      return {
         index,
         hidden: tc.is_hidden,
         verdict,
+        subtask: (tc.subtask as number) ?? 0,
       };
-      return result;
     }),
   );
+
+  // Client-facing results never expose subtask internals beyond what's
+  // needed; keep index/hidden/verdict.
+  const executions: CaseResult[] = execRaw.map((r) => ({
+    index: r.index,
+    hidden: r.hidden,
+    verdict: r.verdict,
+  }));
 
   // --- Aggregate final verdict ----------------------------------------
   const passed = executions.filter((r) => r.verdict === "AC").length;
@@ -300,6 +309,39 @@ export async function POST(req: NextRequest) {
   }
   if (passed === total) {
     finalVerdict = "AC";
+  }
+
+  // --- Subtask scoring (only for problems that define subtasks) -------
+  let score: number | undefined;
+  let maxScore: number | undefined;
+  let subtaskResults: SubtaskResult[] | undefined;
+  {
+    const { data: probRow } = await admin
+      .from("problems")
+      .select("subtasks")
+      .eq("id", problemId)
+      .maybeSingle();
+    const subtasks = Array.isArray(probRow?.subtasks)
+      ? (probRow!.subtasks as { no: number; points: number; desc: string }[])
+      : [];
+    if (subtasks.length > 0) {
+      maxScore = subtasks.reduce((a, s) => a + (Number(s.points) || 0), 0);
+      score = 0;
+      subtaskResults = [];
+      for (const st of subtasks) {
+        const casesInSt = execRaw.filter((r) => r.subtask === st.no);
+        // A subtask is earned only if it has cases and ALL of them pass.
+        const allPass =
+          casesInSt.length > 0 && casesInSt.every((r) => r.verdict === "AC");
+        if (allPass) score += Number(st.points) || 0;
+        subtaskResults.push({
+          no: st.no,
+          points: Number(st.points) || 0,
+          desc: st.desc ?? "",
+          passed: allPass,
+        });
+      }
+    }
   }
 
   // --- Persist the submission -----------------------------------------
@@ -370,6 +412,9 @@ export async function POST(req: NextRequest) {
     results: executions,
     bestBytes,
     isRecord,
+    score,
+    maxScore,
+    subtaskResults,
   };
 
   return NextResponse.json<SubmitResponse>(responseBody, { status: 200 });

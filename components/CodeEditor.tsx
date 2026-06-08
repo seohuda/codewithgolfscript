@@ -214,6 +214,41 @@ export default function CodeEditor({ problemId, onAccepted }: CodeEditorProps) {
               })}
             </div>
           )}
+          {result.subtaskResults && result.subtaskResults.length > 0 && (
+            <div className="mt-3 border-t border-surface-border/60 pt-3">
+              <div className="mb-2 flex items-center justify-between text-sm">
+                <span className="font-bold text-ink">부분 점수</span>
+                <span className="font-mono font-bold text-accent">
+                  {result.score} / {result.maxScore}점
+                </span>
+              </div>
+              <div className="space-y-1">
+                {result.subtaskResults.map((s) => (
+                  <div
+                    key={s.no}
+                    className="flex items-center justify-between rounded-md border border-surface-border bg-surface px-3 py-1.5 text-xs"
+                  >
+                    <span className="text-ink-soft">
+                      <span
+                        className="mr-2 font-mono font-bold"
+                        style={{ color: s.passed ? "#188038" : "#d93025" }}
+                      >
+                        {s.passed ? "✓" : "✗"}
+                      </span>
+                      서브태스크 {s.no}
+                      {s.desc ? ` · ${s.desc}` : ""}
+                    </span>
+                    <span
+                      className="font-mono font-semibold"
+                      style={{ color: s.passed ? "#188038" : "#9aa0a6" }}
+                    >
+                      {s.passed ? s.points : 0} / {s.points}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           {result.verdict === "AC" && (
             <div className="mt-3 border-t border-surface-border/60 pt-3 text-sm">
               {result.isRecord ? (

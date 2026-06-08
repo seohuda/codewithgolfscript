@@ -27,7 +27,21 @@ export interface TestCase {
   stdin: string;
   stdout: string;
   is_hidden: boolean;
+  subtask?: number;
   created_at: string;
+}
+
+export interface Subtask {
+  no: number;
+  points: number;
+  desc: string;
+}
+
+export interface SubtaskResult {
+  no: number;
+  points: number;
+  desc: string;
+  passed: boolean;
 }
 
 export interface Submission {
@@ -70,4 +84,8 @@ export interface SubmitResponse {
   message?: string;
   bestBytes?: number | null;
   isRecord?: boolean;
+  // Subtask scoring (only present for problems that define subtasks).
+  score?: number;
+  maxScore?: number;
+  subtaskResults?: SubtaskResult[];
 }

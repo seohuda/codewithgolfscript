@@ -22,10 +22,30 @@ function cleanTags(raw: unknown): string[] {
   return out;
 }
 
+function cleanSubtasks(raw: unknown): { no: number; points: number; desc: string }[] {
+  if (!Array.isArray(raw)) return [];
+  const out: { no: number; points: number; desc: string }[] = [];
+  for (const s of raw) {
+    const o = s as { no?: number; points?: number; desc?: string };
+    const no = Number(o?.no);
+    const points = Number(o?.points);
+    if (!Number.isFinite(no) || no <= 0) continue;
+    if (!Number.isFinite(points) || points < 0) continue;
+    out.push({
+      no,
+      points: Math.trunc(points),
+      desc: String(o?.desc ?? "").slice(0, 200),
+    });
+    if (out.length >= 20) break;
+  }
+  return out;
+}
+
 interface CaseInput {
   stdin: string;
   stdout: string;
   is_hidden?: boolean;
+  subtask?: number;
 }
 
 // GET /api/admin/problems/[id] — full problem incl. test cases
@@ -46,7 +66,7 @@ export async function GET(
   const { data: problem } = await admin
     .from("problems")
     .select(
-      "id, title, description, input_desc, output_desc, tier, source, step_group, step_order, sample_input, sample_output, image_url, tags",
+      "id, title, description, input_desc, output_desc, tier, source, step_group, step_order, sample_input, sample_output, image_url, tags, subtasks",
     )
     .eq("id", id)
     .maybeSingle();
@@ -55,7 +75,7 @@ export async function GET(
   }
   const { data: cases } = await admin
     .from("test_cases")
-    .select("id, stdin, stdout, is_hidden")
+    .select("id, stdin, stdout, is_hidden, subtask")
     .eq("problem_id", id)
     .order("id", { ascending: true });
 
@@ -128,6 +148,7 @@ export async function PATCH(
       sample_output: String(body.sample_output ?? ""),
       image_url: sanitizeUrl(body.image_url),
       tags: cleanTags(body.tags),
+      subtasks: cleanSubtasks(body.subtasks),
     })
     .eq("id", id);
 
@@ -144,6 +165,7 @@ export async function PATCH(
         stdin: c.stdin ?? "",
         stdout: c.stdout ?? "",
         is_hidden: !!c.is_hidden,
+        subtask: Number(c.subtask) || 0,
       }));
       const { error: caseErr } = await admin.from("test_cases").insert(rows);
       if (caseErr) {

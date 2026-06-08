@@ -52,12 +52,14 @@ export default function EditProblemPage() {
           sample_output: p.sample_output ?? "",
           image_url: p.image_url ?? "",
           tags: Array.isArray(p.tags) ? p.tags : [],
+          subtasks: Array.isArray(p.subtasks) ? p.subtasks : [],
         });
         setCases(
           (data.cases ?? []).map((c: TestCaseDraft) => ({
             stdin: c.stdin,
             stdout: c.stdout,
             is_hidden: c.is_hidden,
+            subtask: (c as { subtask?: number }).subtask ?? 0,
           })),
         );
       } finally {

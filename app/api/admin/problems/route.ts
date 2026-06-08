@@ -15,6 +15,13 @@ interface CaseInput {
   stdin: string;
   stdout: string;
   is_hidden?: boolean;
+  subtask?: number;
+}
+
+interface SubtaskInput {
+  no?: number;
+  points?: number;
+  desc?: string;
 }
 
 interface ProblemInput {
@@ -32,6 +39,27 @@ interface ProblemInput {
   solution?: string; // optional reference solution to validate cases
   cases?: CaseInput[];
   tags?: string[];
+  subtasks?: SubtaskInput[];
+}
+
+// Normalize a subtask list: valid numbered entries with points/desc.
+function cleanSubtasks(raw: unknown): { no: number; points: number; desc: string }[] {
+  if (!Array.isArray(raw)) return [];
+  const out: { no: number; points: number; desc: string }[] = [];
+  for (const s of raw) {
+    const o = s as SubtaskInput;
+    const no = Number(o?.no);
+    const points = Number(o?.points);
+    if (!Number.isFinite(no) || no <= 0) continue;
+    if (!Number.isFinite(points) || points < 0) continue;
+    out.push({
+      no,
+      points: Math.trunc(points),
+      desc: String(o?.desc ?? "").slice(0, 200),
+    });
+    if (out.length >= 20) break;
+  }
+  return out;
 }
 
 // Normalize a tag list: trim, drop empties, dedupe, cap length & count.
@@ -122,6 +150,7 @@ export async function POST(req: NextRequest) {
       sample_output: body.sample_output ?? "",
       image_url: sanitizeUrl(body.image_url),
       tags: cleanTags(body.tags),
+      subtasks: cleanSubtasks(body.subtasks),
     })
     .select("id")
     .single();
@@ -137,6 +166,7 @@ export async function POST(req: NextRequest) {
       stdin: c.stdin ?? "",
       stdout: c.stdout ?? "",
       is_hidden: !!c.is_hidden,
+      subtask: Number(c.subtask) || 0,
     }));
     const { error: caseErr } = await admin.from("test_cases").insert(rows);
     if (caseErr) {
