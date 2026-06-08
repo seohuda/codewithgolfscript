@@ -40,9 +40,16 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Completing a reset proves the user controls the inbox the link was
+  // sent to, so we also mark the email verified and clear any lockout.
   await admin
     .from("users")
-    .update({ password_hash: hashPassword(password) })
+    .update({
+      password_hash: hashPassword(password),
+      email_verified: true,
+      failed_login_count: 0,
+      lockout_until: null,
+    })
     .eq("id", row.user_id);
   await admin.from("auth_tokens").update({ used: true }).eq("id", row.id);
 
