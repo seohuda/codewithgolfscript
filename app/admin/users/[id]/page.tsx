@@ -21,6 +21,8 @@ interface TargetUser {
   email: string | null;
   isAdmin: boolean;
   bannedUntil: string | null;
+  suspended: boolean;
+  suspendedReason: string | null;
   createdAt: string;
 }
 
@@ -85,6 +87,37 @@ export default function AdminUserDetailPage() {
       setResetMsg("네트워크 오류가 발생했습니다.");
     } finally {
       setResetting(false);
+    }
+  }
+
+  async function doAction(action: "suspend" | "unsuspend" | "delete") {
+    if (action === "delete") {
+      if (!confirm("이 계정을 영구 삭제할까요? 제출/기록도 함께 삭제됩니다.")) return;
+    }
+    let reason = "";
+    if (action === "suspend") {
+      reason = prompt("정지 사유 (선택):") ?? "";
+    }
+    setResetMsg(null);
+    try {
+      const res = await fetch(`/api/admin/users/${id}/action`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, reason }),
+      });
+      const d = await res.json();
+      if (!res.ok) {
+        setResetMsg(d.error ?? "작업에 실패했습니다.");
+        return;
+      }
+      if (action === "delete") {
+        router.push("/admin/users");
+        router.refresh();
+        return;
+      }
+      load();
+    } catch {
+      setResetMsg("네트워크 오류가 발생했습니다.");
     }
   }
 
@@ -158,6 +191,11 @@ export default function AdminUserDetailPage() {
                 관리자
               </span>
             )}
+            {target.suspended && (
+              <span className="rounded bg-danger/15 px-2 py-0.5 text-xs font-bold text-danger">
+                정지됨
+              </span>
+            )}
             <Link
               href={`/users/${encodeURIComponent(target.username)}`}
               className="text-xs font-medium text-accent hover:underline"
@@ -173,7 +211,7 @@ export default function AdminUserDetailPage() {
           <p className="mt-3 text-[11px] text-ink-faint">
             이 페이지의 제출 코드 열람은 모니터링 기록에 남깁니다.
           </p>
-          <div className="mt-3 flex items-center gap-3">
+          <div className="mt-3 flex flex-wrap items-center gap-2">
             <button
               onClick={sendReset}
               disabled={resetting || !target.email}
@@ -181,6 +219,30 @@ export default function AdminUserDetailPage() {
             >
               {resetting ? "발송 중…" : "비밀번호 재설정 메일 보내기"}
             </button>
+            {!target.isAdmin && !target.suspended && (
+              <button
+                onClick={() => doAction("suspend")}
+                className="rounded-md border border-danger/30 px-3 py-1.5 text-xs font-medium text-danger hover:bg-danger/10"
+              >
+                계정 정지
+              </button>
+            )}
+            {!target.isAdmin && target.suspended && (
+              <button
+                onClick={() => doAction("unsuspend")}
+                className="btn-outlined px-3 py-1.5 text-xs"
+              >
+                정지 해제
+              </button>
+            )}
+            {!target.isAdmin && (
+              <button
+                onClick={() => doAction("delete")}
+                className="rounded-md border border-danger/30 px-3 py-1.5 text-xs font-medium text-danger hover:bg-danger/10"
+              >
+                계정 삭제
+              </button>
+            )}
             {resetMsg && (
               <span className="text-xs text-ink-soft">{resetMsg}</span>
             )}

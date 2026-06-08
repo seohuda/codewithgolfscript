@@ -74,6 +74,24 @@ export default function AdminUsersPage() {
     if (!loading && user?.isAdmin) load();
   }, [loading, user, load]);
 
+  async function cleanupUnverified() {
+    if (!confirm("24시간 이상 이메일 인증을 안 한 계정을 모두 삭제할까요?")) return;
+    try {
+      const res = await fetch("/api/admin/cleanup-unverified", {
+        method: "POST",
+      });
+      const d = await res.json();
+      if (res.ok) {
+        alert(`${d.deleted ?? 0}개 계정을 정리했습니다.`);
+        load();
+      } else {
+        alert(d.error ?? "정리에 실패했습니다.");
+      }
+    } catch {
+      alert("네트워크 오류가 발생했습니다.");
+    }
+  }
+
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   if (loading) {
@@ -105,6 +123,9 @@ export default function AdminUsersPage() {
           <Link href="/admin/audit" className="btn-outlined">
             모니터링 기록
           </Link>
+          <button onClick={cleanupUnverified} className="btn-outlined">
+            미인증 계정 정리
+          </button>
         </div>
       </div>
 

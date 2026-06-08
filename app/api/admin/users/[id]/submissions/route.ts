@@ -29,7 +29,7 @@ export async function GET(
   // Resolve the target user.
   const { data: target } = await admin
     .from("users")
-    .select("id, username, email, is_admin, banned_until, created_at")
+    .select("id, username, email, is_admin, banned_until, suspended, suspended_reason, created_at")
     .eq("id", userId)
     .maybeSingle();
   if (!target) {
@@ -91,6 +91,8 @@ export async function GET(
       email: target.email ?? null,
       isAdmin: !!target.is_admin,
       bannedUntil: target.banned_until ?? null,
+      suspended: !!target.suspended,
+      suspendedReason: target.suspended_reason ?? null,
       createdAt: target.created_at,
     },
     submissions,

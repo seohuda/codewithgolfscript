@@ -9,9 +9,13 @@ import {
 } from "@/lib/auth";
 import { generateToken, VERIFY_TOKEN_TTL_MS } from "@/lib/tokens";
 import { sendVerificationEmail, siteUrl } from "@/lib/email";
+import { getClientIp } from "@/lib/ip";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+// Maximum accounts allowed from a single source IP.
+const MAX_ACCOUNTS_PER_IP = 3;
 
 // Creates a verification token row and emails the link.
 // Returns true on success, false if the email could not be sent.
@@ -60,6 +64,23 @@ export async function POST(req: NextRequest) {
 
   const admin = getSupabaseAdminClient();
 
+  // --- Per-IP account limit ------------------------------------------
+  const ip = getClientIp(req);
+  if (ip) {
+    const { count } = await admin
+      .from("users")
+      .select("id", { count: "exact", head: true })
+      .eq("signup_ip", ip);
+    if ((count ?? 0) >= MAX_ACCOUNTS_PER_IP) {
+      return NextResponse.json(
+        {
+          error: `이 네트워크에서 만들 수 있는 계정 수(${MAX_ACCOUNTS_PER_IP}개)를 초과했습니다.`,
+        },
+        { status: 429 },
+      );
+    }
+  }
+
   // Reject if the email is already taken.
   const { data: emailTaken } = await admin
     .from("users")
@@ -101,6 +122,7 @@ export async function POST(req: NextRequest) {
         password_hash: hashPassword(password),
         email,
         email_verified: false,
+        signup_ip: ip || null,
       })
       .eq("id", existing.id);
 
@@ -132,6 +154,7 @@ export async function POST(req: NextRequest) {
       password_hash: hashPassword(password),
       email,
       email_verified: false,
+      signup_ip: ip || null,
     })
     .select("id, username")
     .single();

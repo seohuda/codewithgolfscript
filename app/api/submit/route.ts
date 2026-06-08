@@ -14,6 +14,10 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+// Maximum accepted submission size in UTF-8 bytes. Golf solutions are
+// tiny; this blocks oversized payloads before judging.
+const MAX_SUBMISSION_BYTES = 4096;
+
 // Verdict precedence when aggregating across all test cases.
 // Lower number = reported first when multiple failures occur.
 const VERDICT_PRIORITY: Record<Verdict, number> = {
@@ -83,12 +87,17 @@ export async function POST(req: NextRequest) {
   if (!code) {
     return badRequest("제출할 코드를 입력해 주세요.");
   }
-  if (code.length > 10000) {
-    return badRequest("코드가 너무 깁니다.");
-  }
 
-  // Exact UTF-8 byte size — this is the ranking metric.
+  // Exact UTF-8 byte size — this is the ranking metric and the limit.
   const bytes = byteLength(code);
+
+  // Reject oversized submissions before any judging happens. Code golf
+  // solutions are tiny, so anything beyond this is abuse/accidental.
+  if (bytes > MAX_SUBMISSION_BYTES) {
+    return badRequest(
+      `제출 코드가 너무 깁니다. (${bytes}바이트 / 최대 ${MAX_SUBMISSION_BYTES}바이트)`,
+    );
+  }
 
   const admin = getSupabaseAdminClient();
 
@@ -97,7 +106,7 @@ export async function POST(req: NextRequest) {
     // Existing ban still active? Also confirm the account is verified.
     const { data: u } = await admin
       .from("users")
-      .select("banned_until, email_verified")
+      .select("banned_until, email_verified, suspended")
       .eq("id", session.userId)
       .maybeSingle();
     if (!u) {
@@ -112,6 +121,20 @@ export async function POST(req: NextRequest) {
           message: "로그인이 필요합니다.",
         },
         { status: 401 },
+      );
+    }
+    if (u.suspended) {
+      return NextResponse.json<SubmitResponse>(
+        {
+          submissionId: null,
+          verdict: "RE",
+          bytes: 0,
+          passed: 0,
+          total: 0,
+          results: [],
+          message: "정지된 계정은 제출할 수 없습니다.",
+        },
+        { status: 403 },
       );
     }
     if (!u.email_verified) {

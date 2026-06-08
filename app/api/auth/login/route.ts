@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
   const { data: user, error } = await admin
     .from("users")
     .select(
-      "id, username, password_hash, is_admin, email_verified, email, failed_login_count, lockout_until",
+      "id, username, password_hash, is_admin, email_verified, email, failed_login_count, lockout_until, suspended, suspended_reason",
     )
     .ilike("username", username)
     .maybeSingle();
@@ -79,6 +79,19 @@ export async function POST(req: NextRequest) {
   );
 
   if (!user || !user.password_hash) return invalid;
+
+  // Admin-suspended accounts cannot log in.
+  if (user.suspended) {
+    return NextResponse.json(
+      {
+        error: user.suspended_reason
+          ? `정지된 계정입니다: ${user.suspended_reason}`
+          : "정지된 계정입니다. 관리자에게 문의하세요.",
+        suspended: true,
+      },
+      { status: 403 },
+    );
+  }
 
   // Account currently locked?
   if (user.lockout_until && new Date(user.lockout_until as string) > new Date()) {
