@@ -3,6 +3,7 @@ import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
 import { rateUser } from "@/lib/score";
 import { computeBadges } from "@/lib/badges";
 import { kstDayKey } from "@/lib/date";
+import { verifySessionToken, SESSION_COOKIE } from "@/lib/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -16,7 +17,7 @@ interface SolvedProblem {
 
 // GET /api/users/[username]
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: { username: string } },
 ) {
   let username = "";
@@ -40,7 +41,7 @@ export async function GET(
 
     const { data: user, error: userErr } = await admin
       .from("users")
-      .select("id, username, created_at, is_admin")
+      .select("id, username, created_at, is_admin, bio, featured_badge")
       .ilike("username", safeName)
       .maybeSingle();
 
@@ -140,11 +141,47 @@ export async function GET(
       groupCounts,
     });
 
+    // Follow counts and the viewer's relationship to this profile.
+    const [followersRes, followingRes] = await Promise.all([
+      admin
+        .from("follows")
+        .select("follower_id", { count: "exact", head: true })
+        .eq("following_id", user.id),
+      admin
+        .from("follows")
+        .select("following_id", { count: "exact", head: true })
+        .eq("follower_id", user.id),
+    ]);
+    const followers = followersRes.count ?? 0;
+    const following = followingRes.count ?? 0;
+
+    let isFollowing = false;
+    let isMe = false;
+    const session = verifySessionToken(req.cookies.get(SESSION_COOKIE)?.value);
+    if (session) {
+      isMe = session.userId === user.id;
+      if (!isMe) {
+        const { data: rel } = await admin
+          .from("follows")
+          .select("follower_id")
+          .eq("follower_id", session.userId)
+          .eq("following_id", user.id)
+          .maybeSingle();
+        isFollowing = !!rel;
+      }
+    }
+
     return NextResponse.json({
       user: {
         username: user.username,
         created_at: user.created_at,
         is_admin: user.is_admin,
+        bio: user.bio ?? "",
+        featured_badge: user.featured_badge ?? null,
+        followers,
+        following,
+        isFollowing,
+        isMe,
       },
       stats: {
         totalSubmissions,

@@ -85,6 +85,12 @@ export default function RootLayout({
                     단계별
                   </Link>
                   <Link
+                    href="/learn"
+                    className="px-3 py-1.5 font-mono text-xs font-medium uppercase tracking-wide text-ink-soft transition-colors hover:text-accent"
+                  >
+                    배우기
+                  </Link>
+                  <Link
                     href="/board"
                     className="px-3 py-1.5 font-mono text-xs font-medium uppercase tracking-wide text-ink-soft transition-colors hover:text-accent"
                   >

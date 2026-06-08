@@ -7,6 +7,7 @@ import TierBadge from "@/components/TierBadge";
 import ActivityGraph from "@/components/ActivityGraph";
 import BadgeGrid from "@/components/BadgeGrid";
 import { getTierInfo } from "@/lib/tiers";
+import { useAuth } from "@/components/AuthProvider";
 
 interface SolvedProblem {
   id: number;
@@ -16,7 +17,17 @@ interface SolvedProblem {
 }
 
 interface ProfileData {
-  user: { username: string; created_at: string; is_admin: boolean };
+  user: {
+    username: string;
+    created_at: string;
+    is_admin: boolean;
+    bio: string;
+    featured_badge: string | null;
+    followers: number;
+    following: number;
+    isFollowing: boolean;
+    isMe: boolean;
+  };
   stats: {
     totalSubmissions: number;
     acSubmissions: number;
@@ -61,6 +72,27 @@ export default function ProfilePage() {
   const [data, setData] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { user: me } = useAuth();
+
+  const [following, setFollowing] = useState(false);
+  const [followers, setFollowers] = useState(0);
+  const [busy, setBusy] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [bioDraft, setBioDraft] = useState("");
+  const [badgeDraft, setBadgeDraft] = useState<string | null>(null);
+
+  async function reload() {
+    const res = await fetch(`/api/users/${username}`, { cache: "no-store" });
+    const d = await res.json();
+    if (res.ok) {
+      setData(d as ProfileData);
+      setFollowing(d.user.isFollowing);
+      setFollowers(d.user.followers);
+      setBioDraft(d.user.bio ?? "");
+      setBadgeDraft(d.user.featured_badge ?? null);
+    }
+    return { res, d };
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -75,6 +107,10 @@ export default function ProfilePage() {
           setError(d.error ?? "불러오기 실패");
         } else {
           setData(d as ProfileData);
+          setFollowing(d.user.isFollowing);
+          setFollowers(d.user.followers);
+          setBioDraft(d.user.bio ?? "");
+          setBadgeDraft(d.user.featured_badge ?? null);
         }
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e.message : "오류");
@@ -87,6 +123,38 @@ export default function ProfilePage() {
       cancelled = true;
     };
   }, [username]);
+
+  async function toggleFollow() {
+    if (!me || busy) return;
+    setBusy(true);
+    const method = following ? "DELETE" : "POST";
+    try {
+      const res = await fetch(`/api/users/${username}/follow`, { method });
+      if (res.ok) {
+        setFollowing(!following);
+        setFollowers((n) => n + (following ? -1 : 1));
+      }
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function saveProfile() {
+    setBusy(true);
+    try {
+      const res = await fetch("/api/me/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bio: bioDraft, featuredBadge: badgeDraft }),
+      });
+      if (res.ok) {
+        setEditing(false);
+        await reload();
+      }
+    } finally {
+      setBusy(false);
+    }
+  }
 
   if (loading) {
     return (
@@ -110,6 +178,11 @@ export default function ProfilePage() {
   }
 
   const { user, stats, solvedProblems } = data;
+  const earnedBadges = (data.badges ?? []).filter((b) => b.earned);
+  const featured =
+    user.featured_badge
+      ? (data.badges ?? []).find((b) => b.id === user.featured_badge && b.earned)
+      : null;
 
   return (
     <div className="animate-fade-in space-y-6">
@@ -125,7 +198,7 @@ export default function ProfilePage() {
           </span>
         </div>
         <div className="flex-1">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <h1
               className="text-2xl font-bold"
               style={{ color: getTierInfo(stats.userTier).color }}
@@ -137,10 +210,102 @@ export default function ProfilePage() {
                 관리자
               </span>
             )}
+            {featured && (
+              <span className="chip border-accent/30 bg-accent/10 text-accent">
+                {featured.name}
+              </span>
+            )}
           </div>
           <p className="mt-1 text-sm text-ink-faint">
             가입일 {formatDate(user.created_at)}
           </p>
+          <div className="mt-2 flex gap-4 text-sm">
+            <span className="text-ink-soft">
+              팔로워 <span className="font-bold text-ink">{followers}</span>
+            </span>
+            <span className="text-ink-soft">
+              팔로잉 <span className="font-bold text-ink">{user.following}</span>
+            </span>
+          </div>
+          {user.bio && !editing && (
+            <p className="mt-3 whitespace-pre-wrap text-sm text-ink-soft">
+              {user.bio}
+            </p>
+          )}
+          {/* Follow / edit controls */}
+          <div className="mt-3 flex flex-wrap gap-2">
+            {me && !user.isMe && (
+              <button
+                onClick={toggleFollow}
+                disabled={busy}
+                className={
+                  following
+                    ? "btn-outlined px-4 py-1.5 text-sm"
+                    : "btn-filled px-4 py-1.5 text-sm"
+                }
+              >
+                {following ? "팔로잉" : "팔로우"}
+              </button>
+            )}
+            {user.isMe && !editing && (
+              <button
+                onClick={() => setEditing(true)}
+                className="btn-outlined px-4 py-1.5 text-sm"
+              >
+                프로필 편집
+              </button>
+            )}
+          </div>
+
+          {editing && (
+            <div className="mt-3 space-y-3 border-t border-surface-border pt-3">
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-ink">자기소개</label>
+                <textarea
+                  value={bioDraft}
+                  onChange={(e) => setBioDraft(e.target.value)}
+                  rows={3}
+                  maxLength={300}
+                  placeholder="자기소개를 입력하세요 (최대 300자)"
+                  className="field resize-y text-sm"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-ink">대표 뱃지</label>
+                <select
+                  value={badgeDraft ?? ""}
+                  onChange={(e) => setBadgeDraft(e.target.value || null)}
+                  className="field text-sm"
+                >
+                  <option value="">없음</option>
+                  {earnedBadges.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={saveProfile}
+                  disabled={busy}
+                  className="btn-filled px-4 py-1.5 text-sm"
+                >
+                  저장
+                </button>
+                <button
+                  onClick={() => {
+                    setEditing(false);
+                    setBioDraft(user.bio ?? "");
+                    setBadgeDraft(user.featured_badge ?? null);
+                  }}
+                  className="btn-outlined px-4 py-1.5 text-sm"
+                >
+                  취소
+                </button>
+              </div>
+            </div>
+          )}
         </div>
         <div className="text-right">
           <p className="text-xs text-ink-soft">점수</p>
