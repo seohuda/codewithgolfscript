@@ -22,6 +22,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [notice, setNotice] = useState<string | null>(null);
   const [showResend, setShowResend] = useState(false);
   // Username availability (signup only).
+  const [agreed, setAgreed] = useState(false);
   const [checking, setChecking] = useState(false);
   const [usernameStatus, setUsernameStatus] = useState<
     "idle" | "ok" | "taken"
@@ -93,6 +94,10 @@ export default function AuthForm({ mode }: AuthFormProps) {
     setShowResend(false);
     if (isSignup && password !== confirm) {
       setError("비밀번호가 일치하지 않습니다.");
+      return;
+    }
+    if (isSignup && !agreed) {
+      setError("이용약관 및 개인정보처리방침에 동의해 주세요.");
       return;
     }
     if (isSignup && usernameStatus !== "ok") {
@@ -260,6 +265,22 @@ export default function AuthForm({ mode }: AuthFormProps) {
               className="field font-mono"
             />
           </div>
+        )}
+        {isSignup && (
+          <label className="flex items-start gap-2 text-sm text-ink-soft">
+            <input
+              type="checkbox"
+              checked={agreed}
+              onChange={(e) => setAgreed(e.target.checked)}
+              className="mt-0.5 accent-accent"
+            />
+            <span>
+              <Link href="/terms" className="text-accent hover:underline" target="_blank">이용약관</Link>
+              {" 및 "}
+              <Link href="/privacy" className="text-accent hover:underline" target="_blank">개인정보처리방침</Link>
+              에 동의합니다. (만 14세 이상)
+            </span>
+          </label>
         )}
         {error && (
           <p className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">

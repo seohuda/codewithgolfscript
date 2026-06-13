@@ -173,10 +173,16 @@ export async function POST(req: NextRequest) {
   }
 
   // Successful login → reset the failure counter and any lockout.
+  // Also cancel any pending withdrawal request.
   if ((user.failed_login_count as number) > 0 || user.lockout_until) {
     await admin
       .from("users")
-      .update({ failed_login_count: 0, lockout_until: null })
+      .update({ failed_login_count: 0, lockout_until: null, withdrawal_requested_at: null })
+      .eq("id", user.id);
+  } else {
+    await admin
+      .from("users")
+      .update({ withdrawal_requested_at: null })
       .eq("id", user.id);
   }
 

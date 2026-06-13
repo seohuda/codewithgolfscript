@@ -5,6 +5,7 @@ import { AuthProvider } from "@/components/AuthProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import ThemeToggle from "@/components/ThemeToggle";
 import HeaderNav from "@/components/HeaderNav";
+import CookieBanner from "@/components/CookieBanner";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
@@ -120,9 +121,14 @@ export default function RootLayout({
                 <span className="text-base font-extrabold uppercase tracking-tight text-ink">
                   CODE WITH GOLF<span className="text-accent">SCRIPT</span>
                 </span>
-                <span className="eyebrow">© 2026</span>
+                <div className="flex items-center gap-4">
+                  <Link href="/terms" className="text-xs text-ink-soft hover:text-accent">이용약관</Link>
+                  <Link href="/privacy" className="text-xs text-ink-soft hover:text-accent">개인정보처리방침</Link>
+                  <span className="eyebrow">© 2026</span>
+                </div>
               </div>
             </footer>
+            <CookieBanner />
           </AuthProvider>
         </ThemeProvider>
       </body>
