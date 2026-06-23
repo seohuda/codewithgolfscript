@@ -7,6 +7,7 @@ import {
 } from "@/lib/auth";
 import { generateToken, VERIFY_TOKEN_TTL_MS } from "@/lib/tokens";
 import { sendVerificationEmail, siteUrl } from "@/lib/email";
+import { isTokenEmailOnCooldown } from "@/lib/emailThrottle";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -57,6 +58,9 @@ export async function POST(req: NextRequest) {
 
   const email = normalizeEmail((user.email as string) ?? "");
   if (!email) return generic;
+  if (await isTokenEmailOnCooldown(admin, user.id as string, "verify_email")) {
+    return generic;
+  }
 
   try {
     const { raw, hash } = generateToken();

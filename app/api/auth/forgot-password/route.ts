@@ -3,6 +3,7 @@ import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
 import { normalizeEmail, escapeLike } from "@/lib/auth";
 import { generateToken, RESET_TOKEN_TTL_MS } from "@/lib/tokens";
 import { sendPasswordResetEmail, siteUrl } from "@/lib/email";
+import { isTokenEmailOnCooldown } from "@/lib/emailThrottle";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -30,6 +31,9 @@ export async function POST(req: NextRequest) {
       .maybeSingle();
 
     if (user) {
+      if (await isTokenEmailOnCooldown(admin, user.id as string, "reset_password")) {
+        return ok;
+      }
       const { raw, hash } = generateToken();
       await admin.from("auth_tokens").insert({
         user_id: user.id,
