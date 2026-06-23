@@ -1,8 +1,9 @@
 import { ImageResponse } from "next/og";
 import { getTierInfo } from "@/lib/tiers";
+import { SITE_NAME } from "@/lib/site";
 
 export const runtime = "nodejs";
-export const alt = "문제 · CODE WITH GOLFSCRIPT";
+export const alt = `문제 · ${SITE_NAME}`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -62,7 +63,7 @@ export default async function Image({ params }: { params: { id: string } }) {
             textTransform: "uppercase",
           }}
         >
-          CODE WITH GOLFSCRIPT
+          {SITE_NAME}
         </div>
 
         <div

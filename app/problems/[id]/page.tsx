@@ -9,6 +9,7 @@ import ProblemWorkspace from "@/components/ProblemWorkspace";
 import TierBadge from "@/components/TierBadge";
 import ProblemStatusBadge from "@/components/ProblemStatusBadge";
 import DifficultyVote from "@/components/DifficultyVote";
+import { SITE_NAME } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -53,14 +54,14 @@ export async function generateMetadata({
     title: problem.title,
     description: summary,
     openGraph: {
-      title: `${problem.title} · CODE WITH GOLFSCRIPT`,
+      title: `${problem.title} · ${SITE_NAME}`,
       description: summary,
       type: "article",
       url: `/problems/${problem.id}`,
     },
     twitter: {
       card: "summary_large_image",
-      title: `${problem.title} · CODE WITH GOLFSCRIPT`,
+      title: `${problem.title} · ${SITE_NAME}`,
       description: summary,
     },
   };

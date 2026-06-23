@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/adminAuth";
+import { SITE_NAME } from "@/lib/site";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -74,7 +75,7 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({
         from,
         to,
-        subject: "[CODE WITH GOLFSCRIPT] 메일 발송 테스트",
+        subject: `[${SITE_NAME}] 메일 발송 테스트`,
         html: "<p>이 메일이 보이면 운영 환경의 메일 발송이 정상입니다.</p>",
         text: "이 메일이 보이면 운영 환경의 메일 발송이 정상입니다.",
       }),

@@ -1,8 +1,8 @@
 import type { MetadataRoute } from "next";
+import { SITE_URL } from "@/lib/site";
 
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
-  "https://www.golfscript.xyz";
+const SITE_BASE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || SITE_URL;
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -14,7 +14,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/admin", "/me", "/reset-password", "/verify-email"],
       },
     ],
-    sitemap: `${SITE_URL}/sitemap.xml`,
-    host: SITE_URL,
+    sitemap: `${SITE_BASE_URL}/sitemap.xml`,
+    host: SITE_BASE_URL,
   };
 }

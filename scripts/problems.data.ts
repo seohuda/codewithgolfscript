@@ -1,5 +1,5 @@
 /**
- * Problem dataset for CODE WITH GOLFSCRIPT.
+ * Problem dataset for CODE WITH GOLF.
  *
  * Each problem includes Korean text, a reference GolfScript solution,
  * a difficulty tier, and a set of test cases (some hidden). The seed

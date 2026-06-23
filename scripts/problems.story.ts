@@ -1,5 +1,5 @@
 /**
- * Storytelling problem pack for CODE WITH GOLFSCRIPT.
+ * Storytelling problem pack for CODE WITH GOLF.
  *
  * These are *additive* problems (they do NOT replace the existing 142).
  * Every reference solution is verified by scripts/build-story-sql.ts

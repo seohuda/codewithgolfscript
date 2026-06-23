@@ -6,20 +6,25 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import ThemeToggle from "@/components/ThemeToggle";
 import HeaderNav from "@/components/HeaderNav";
 import CookieBanner from "@/components/CookieBanner";
+import {
+  SITE_FULL_NAME,
+  SITE_NAME,
+  SITE_URL as DEFAULT_SITE_URL,
+} from "@/lib/site";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
-  "https://www.golfscript.xyz";
+  DEFAULT_SITE_URL;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "CODE WITH GOLFSCRIPT",
-    template: "%s · CODE WITH GOLFSCRIPT",
+    default: SITE_FULL_NAME,
+    template: `%s · ${SITE_NAME}`,
   },
   description:
     "GolfScript 전용 숏코딩 채점 사이트. 가장 적은 바이트로 푸는 사람이 승리합니다.",
-  applicationName: "CODE WITH GOLFSCRIPT",
+  applicationName: SITE_FULL_NAME,
   keywords: [
     "GolfScript",
     "코드 골프",
@@ -31,8 +36,8 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     type: "website",
-    siteName: "CODE WITH GOLFSCRIPT",
-    title: "CODE WITH GOLFSCRIPT",
+    siteName: SITE_FULL_NAME,
+    title: SITE_FULL_NAME,
     description:
       "GolfScript 전용 숏코딩 채점 사이트. 가장 적은 바이트로 푸는 사람이 승리합니다.",
     url: SITE_URL,
@@ -40,7 +45,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "CODE WITH GOLFSCRIPT",
+    title: SITE_FULL_NAME,
     description:
       "GolfScript 전용 숏코딩 채점 사이트. 가장 적은 바이트로 푸는 사람이 승리합니다.",
   },
@@ -68,7 +73,7 @@ export default function RootLayout({
               <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-4">
                 <Link href="/" className="flex items-center gap-2.5">
                   <span className="text-base font-extrabold uppercase tracking-tight text-ink">
-                    CODE WITH GOLF<span className="text-accent">SCRIPT</span>
+                    {SITE_NAME}
                   </span>
                 </Link>
 
@@ -119,7 +124,7 @@ export default function RootLayout({
             <footer className="border-t border-surface-border bg-surface">
               <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-6">
                 <span className="text-base font-extrabold uppercase tracking-tight text-ink">
-                  CODE WITH GOLF<span className="text-accent">SCRIPT</span>
+                  {SITE_NAME}
                 </span>
                 <div className="flex items-center gap-4">
                   <Link href="/terms" className="text-xs text-ink-soft hover:text-accent">이용약관</Link>

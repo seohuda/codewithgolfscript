@@ -1,5 +1,4 @@
 -- ============================================================
---  CODE WITH GOLFSCRIPT  |  GolfOnlineJudge
 --  Supabase / PostgreSQL DDL Schema
 -- ============================================================
 --  Run this in the Supabase SQL Editor.

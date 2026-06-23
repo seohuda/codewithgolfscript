@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_NAME } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "개인정보처리방침",
@@ -11,7 +12,7 @@ export default function PrivacyPage() {
       <p className="text-ink-soft">시행일: 2026년 6월 13일</p>
 
       <p>
-        CODE WITH GOLFSCRIPT(이하 &ldquo;서비스&rdquo;)는 개인정보보호법에 따라
+        {SITE_NAME}(이하 &ldquo;서비스&rdquo;)는 개인정보보호법에 따라
         이용자의 개인정보를 보호하고 이와 관련한 고충을 신속하고 원활하게
         처리하기 위해 다음과 같이 개인정보처리방침을 수립·공개합니다.
       </p>

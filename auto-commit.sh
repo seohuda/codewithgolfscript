@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================
 #  auto-commit.sh
-#  CODE WITH GOLFSCRIPT | GolfOnlineJudge
 #
 #  Watches the project directory and, every 5 minutes, commits
 #  any pending changes with a timestamped message that includes

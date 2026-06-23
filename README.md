@@ -1,6 +1,8 @@
-# CODE WITH GOLFSCRIPT — GolfOnlineJudge
+# CODE WITH GOLF - GolfScript online judge
 
 A GolfScript-only short-coding judge. Solutions are ranked by **exact UTF-8 byte size** — fewest bytes wins.
+
+Site: https://golfscript.xyz
 
 한국어로 읽기: [README.ko.md](README.ko.md)
 

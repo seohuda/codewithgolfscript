@@ -5,14 +5,16 @@
  *
  * Required env vars:
  *  - RESEND_API_KEY            API key from resend.com
- *  - EMAIL_FROM                verified sender, e.g. "CODE WITH GOLFSCRIPT <no-reply@golfscript.xyz>"
- *  - NEXT_PUBLIC_SITE_URL      base URL for links (e.g. https://www.golfscript.xyz)
+ *  - EMAIL_FROM                verified sender, e.g. "CODE WITH GOLF <no-reply@golfscript.xyz>"
+ *  - NEXT_PUBLIC_SITE_URL      base URL for links (e.g. https://golfscript.xyz)
  */
+
+import { SITE_NAME, SITE_SUBTITLE, SITE_URL } from "@/lib/site";
 
 export function siteUrl(): string {
   return (
     process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
-    "http://localhost:3000"
+    SITE_URL
   );
 }
 
@@ -43,7 +45,8 @@ async function sendEmail(to: string, subject: string, html: string, text: string
 
 function layout(title: string, bodyHtml: string): string {
   return `<div style="font-family:system-ui,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#181818">
-    <h1 style="font-size:18px;font-weight:800;letter-spacing:-.01em">CODE WITH GOLF<span style="color:#ff3b14">SCRIPT</span></h1>
+    <h1 style="font-size:18px;font-weight:800;letter-spacing:-.01em">${SITE_NAME}</h1>
+    <p style="margin-top:4px;font-size:12px;color:#888">${SITE_SUBTITLE}</p>
     <h2 style="font-size:16px;margin-top:24px">${title}</h2>
     ${bodyHtml}
     <p style="margin-top:32px;font-size:12px;color:#888">본 메일은 발신 전용입니다.</p>
@@ -58,7 +61,7 @@ export async function sendVerificationEmail(to: string, link: string) {
      <p style="font-size:12px;color:#888;word-break:break-all">${link}</p>`,
   );
   const text = `이메일 인증을 완료하려면 아래 링크를 여세요 (24시간 유효):\n${link}`;
-  await sendEmail(to, "[CODE WITH GOLFSCRIPT] 이메일 인증", html, text);
+  await sendEmail(to, `[${SITE_NAME}] 이메일 인증`, html, text);
 }
 
 export async function sendPasswordResetEmail(to: string, link: string) {
@@ -69,5 +72,5 @@ export async function sendPasswordResetEmail(to: string, link: string) {
      <p style="font-size:12px;color:#888;word-break:break-all">${link}</p>`,
   );
   const text = `비밀번호를 재설정하려면 아래 링크를 여세요 (1시간 유효):\n${link}`;
-  await sendEmail(to, "[CODE WITH GOLFSCRIPT] 비밀번호 재설정", html, text);
+  await sendEmail(to, `[${SITE_NAME}] 비밀번호 재설정`, html, text);
 }

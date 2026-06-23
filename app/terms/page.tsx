@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_NAME } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "이용약관",
@@ -12,7 +13,7 @@ export default function TermsPage() {
 
       <h2 className="mt-8 text-lg font-semibold">제1조 (목적)</h2>
       <p>
-        본 약관은 CODE WITH GOLFSCRIPT(이하 &ldquo;서비스&rdquo;)의 이용과 관련하여
+        본 약관은 {SITE_NAME}(이하 &ldquo;서비스&rdquo;)의 이용과 관련하여
         서비스 제공자와 이용자 간의 권리, 의무 및 책임사항을 규정함을 목적으로
         합니다.
       </p>

@@ -1,6 +1,8 @@
-# CODE WITH GOLFSCRIPT — GolfOnlineJudge
+# CODE WITH GOLF - GolfScript online judge
 
 이 문서는 [`README.md`](README.md)의 한국어 번역본입니다.
+
+사이트: https://golfscript.xyz
 
 GolfScript 전용 숏코딩 저지입니다. 제출한 솔루션은 **정확한 UTF-8 바이트 수** 기준으로 순위가 매겨지며, 바이트 수가 적을수록 유리합니다.
 

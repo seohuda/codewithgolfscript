@@ -1,7 +1,8 @@
 import { ImageResponse } from "next/og";
+import { SITE_FULL_NAME, SITE_NAME, SITE_SUBTITLE, SITE_URL } from "@/lib/site";
 
 export const runtime = "edge";
-export const alt = "CODE WITH GOLFSCRIPT";
+export const alt = SITE_FULL_NAME;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -30,7 +31,7 @@ export default function Image() {
             textTransform: "uppercase",
           }}
         >
-          Online Judge
+          {SITE_NAME}
         </div>
         <div
           style={{
@@ -40,11 +41,9 @@ export default function Image() {
             fontWeight: 800,
             lineHeight: 1.05,
             marginTop: 12,
-            textTransform: "uppercase",
           }}
         >
-          CODE WITH GOLF
-          <span style={{ color: "#f97316" }}>SCRIPT</span>
+          {SITE_SUBTITLE}
         </div>
         <div
           style={{
@@ -65,7 +64,7 @@ export default function Image() {
             color: "#737373",
           }}
         >
-          ~,{"{)}"}%{"{+}"}* — golfscript.xyz
+          ~,{"{)}"}%{"{+}"}* — {SITE_URL}
         </div>
       </div>
     ),
