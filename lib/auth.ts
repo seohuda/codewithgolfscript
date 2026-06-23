@@ -9,6 +9,7 @@ import { scryptSync, randomBytes, timingSafeEqual, createHmac } from "crypto";
  */
 
 const SCRYPT_KEYLEN = 64;
+let devSessionSecret: string | null = null;
 
 /** Hashes a password. Returns "scrypt$<saltHex>$<hashHex>". */
 export function hashPassword(password: string): string {
@@ -50,7 +51,10 @@ function sessionSecret(): string {
       "SESSION_SECRET is not set (or too short). Refusing to sign sessions with an insecure fallback in production.",
     );
   }
-  return "dev-insecure-secret-change-me";
+  if (!devSessionSecret) {
+    devSessionSecret = randomBytes(32).toString("hex");
+  }
+  return devSessionSecret;
 }
 
 function sign(payload: string): string {
