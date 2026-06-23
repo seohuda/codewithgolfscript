@@ -2,6 +2,8 @@
 
 A GolfScript-only short-coding judge. Solutions are ranked by **exact UTF-8 byte size** — fewest bytes wins.
 
+한국어로 읽기: [README.ko.md](README.ko.md)
+
 ## Stack
 
 - **Next.js** (App Router, TypeScript)
@@ -56,13 +58,3 @@ A GolfScript-only short-coding judge. Solutions are ranked by **exact UTF-8 byte
 4. Run each case in parallel on Piston.
 5. Compare trimmed stdout → `AC` / `WA`; map signals/exit codes → `TLE` / `RE` / `CE`.
 6. Aggregate the final verdict, insert into `submissions`, return the result.
-
-## Auto-commit
-
-`auto-commit.sh` commits pending changes every 5 minutes with a timestamped message.
-
-```bash
-chmod +x auto-commit.sh
-nohup ./auto-commit.sh &       # background
-kill "$(cat .auto-commit.pid)" # stop
-```
