@@ -13,6 +13,16 @@ Site: https://golfscript.xyz
 - **Supabase** (PostgreSQL) — data + Row Level Security
 - **Piston** public API — GolfScript code execution
 
+## File Structure
+
+```text
+app/        # routes, pages, route handlers, metadata, OG images
+components/ # shared UI components
+lib/        # domain logic, integrations, utilities
+scripts/    # seed/verification/build helpers
+sql/        # Supabase schema and seed SQL
+```
+
 ## Setup
 
 1. **Install dependencies**
