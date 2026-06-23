@@ -43,12 +43,9 @@ export async function POST(req: NextRequest) {
       });
       const link = `${siteUrl()}/reset-password?token=${raw}`;
       await sendPasswordResetEmail(email, link);
-      console.log(`[forgot-password] reset email sent to user ${user.id}`);
-    } else {
-      console.log(`[forgot-password] no account for the given email`);
     }
   } catch (e) {
-    console.error("forgot-password failed:", e);
+    console.error("forgot-password failed");
   }
 
   return ok;
