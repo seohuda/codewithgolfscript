@@ -13,6 +13,16 @@ GolfScript 전용 숏코딩 저지입니다. 제출한 솔루션은 **정확한 
 - **Supabase** (PostgreSQL) - 데이터 저장 + Row Level Security
 - **Piston** 공개 API - GolfScript 코드 실행
 
+## 파일 구조
+
+```text
+app/        # 라우트, 페이지, API 핸들러, 메타데이터, OG 이미지
+components/ # 공용 UI 컴포넌트
+lib/        # 도메인 로직, 연동, 유틸리티
+scripts/    # 시드/검증/빌드 보조 스크립트
+sql/        # Supabase 스키마와 시드 SQL
+```
+
 ## 설정
 
 1. **의존성 설치**
