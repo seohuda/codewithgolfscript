@@ -27,11 +27,10 @@ export async function GET(req: NextRequest) {
       },
       EMAIL_FROM: {
         present: !!from,
-        value: from, // not secret; helps confirm the sender/domain
         hasAngle: from.includes("<") && from.includes(">"),
         domain: (from.match(/@([^>\s]+)/)?.[1]) ?? null,
       },
-      NEXT_PUBLIC_SITE_URL: { present: !!siteUrl, value: siteUrl },
+      NEXT_PUBLIC_SITE_URL: { present: !!siteUrl },
       SESSION_SECRET: { present: !!process.env.SESSION_SECRET },
     },
   });
@@ -85,7 +84,7 @@ export async function POST(req: NextRequest) {
       ok: res.ok,
       stage: "send",
       status: res.status,
-      response: text.slice(0, 500),
+      responsePreview: text.slice(0, 160),
     });
   } catch (e) {
     return NextResponse.json({
